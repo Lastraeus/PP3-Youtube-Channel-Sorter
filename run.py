@@ -4,10 +4,15 @@ https://medium.com/mcd-unison/youtube-data-api-v3-in
 -python-tutorial-with-examples-e829a25d2ebd#5999
 """
 import googleapiclient.discovery
+import pytube
 import secret_keys
 
 test_channel1 = "https://www.youtube.com/@kaptainkristian"
 test_channel2 = "https://www.youtube.com/@billwurtz"
+
+channel = pytube.Channel(test_channel1)
+channel_id = channel.channel_id
+print(channel_id)
 
 # API information
 api_service_name = "youtube"
@@ -21,12 +26,14 @@ DEVELOPER_KEY = secret_keys.key1
 
 # API client
 youtube = googleapiclient.discovery.build(api_service_name, api_version, developerKey = DEVELOPER_KEY)
-# 'request' variable is the only thing you must change
-# depending on the resource and method you need to use
-# in your query
-request = None #add request here when channel ID in hand
+# # 'request' variable is the only thing you must change
+# # depending on the resource and method you need to use
+# # in your query
+# request = None #add request here when channel ID in hand
 
-# Query execution
-response = request.execute()
-# Print the results
-print(response)
+
+
+# # Query execution
+# response = request.execute()
+# # Print the results
+# print(response)
