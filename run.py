@@ -5,11 +5,15 @@ https://medium.com/mcd-unison/youtube-data-api-v3-in
 """
 import googleapiclient.discovery
 import pytube  # specifically pip install git+https://github.com/felipeucelli/pytube.git for modern channelurl parsing
-import secret_keys
+import json
 
 test_channel1 = "https://www.youtube.com/@kaptainkristian"
 test_channel2 = "https://www.youtube.com/@billwurtz"
 test_channel3 = "https://www.youtube.com/@billwurtzwrongname"
+
+f = open("creds.json")
+api_key_data = json.load(f)
+
 
 
 try:
@@ -24,7 +28,8 @@ except:
 api_service_name = "youtube"
 api_version = "v3"
 # API key
-DEVELOPER_KEY = secret_keys.key1
+DEVELOPER_KEY = api_key_data["key1"]
+print(DEVELOPER_KEY)
 
 # print("Welcome to the YouTube Channel Sorter")
 # inputted_url = input("Please input a channel URL \n")
