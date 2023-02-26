@@ -161,36 +161,80 @@ def grab_ids_in_date(target_date):
             vid_ids.append(item['contentDetails']['videoId'])
 
 
+def divide_chunks(l, n):
+    # looping till length l
+    for i in range(0, len(l), n):
+        yield l[i:i + n]
+
 def query_vids(vid_ids):
     nextPageToken = None
-    while True:
-        vid_request = youtube.videos().list(
-            part="snippet,statistics",
-            id=','.join(vid_ids),
-            maxResults=50
-        )
-
-        vid_response = vid_request.execute()
-
-        for item in vid_response['items']:
-            vid_views = item['statistics']['viewCount']
-
-            vid_id = item['id']
-            title = item["snippet"]["title"]
-            yt_link = f'https://youtu.be/{vid_id}'
-
-            vids_to_show.append(
-                {
-                    'views': int(vid_views),
-                    'title': title,
-                    'url': yt_link
-                }
+    if len(vid_ids) <= 50:
+        while True:
+            vid_request = youtube.videos().list(
+                part="snippet,statistics",
+                id=','.join(vid_ids),
+                maxResults=50
             )
 
-        nextPageToken = vid_response.get('nextPageToken')
+            vid_response = vid_request.execute()
 
-        if not nextPageToken:
-            break
+            for item in vid_response['items']:
+                vid_views = item['statistics']['viewCount']
+
+                vid_id = item['id']
+                title = item["snippet"]["title"]
+                yt_link = f'https://youtu.be/{vid_id}'
+
+                vids_to_show.append(
+                    {
+                        'views': int(vid_views),
+                        'title': title,
+                        'url': yt_link
+                    }
+                )
+
+            nextPageToken = vid_response.get('nextPageToken')
+
+            if not nextPageToken:
+                break
+    else:
+        list_of_ids_lists = list(divide_chunks(vid_ids, 50))
+        split_vid_list_query(list_of_ids_lists)
+
+
+def split_vid_list_query(list_of_ids_lists):
+    for id_list in list_of_ids_lists:
+        nextPageToken = None
+        while True:
+            vid_request = youtube.videos().list(
+                part="snippet,statistics",
+                id=','.join(id_list),
+                maxResults=50
+            )
+
+            vid_response = vid_request.execute()
+
+            for item in vid_response['items']:
+                vid_views = item['statistics']['viewCount']
+
+                vid_id = item['id']
+                title = item["snippet"]["title"]
+                published = item["snippet"]["publishedAt"]
+                yt_link = f'https://youtu.be/{vid_id}'
+
+                vids_to_show.append(
+                    {
+                        'views': int(vid_views),
+                        'title': title,
+                        'url': yt_link,
+                        "published": published
+                    }
+                )
+
+            nextPageToken = vid_response.get('nextPageToken')
+
+            if not nextPageToken:
+                break
 
 
 def main():
@@ -216,9 +260,10 @@ def main():
     grab_ids_in_date(target_date)
     query_vids(vid_ids)
     vids_to_show.sort(key=lambda vid: vid['views'], reverse=True)
+    print("---------------------------------------------------------------------")
     for video in vids_to_show[:10]:
         print(video["title"])
-        print("Views: ", video['views'])
+        print(f'Views: {video["views"]}, Published: {video["published"]}')
         print(video['url'])
 
 
