@@ -106,10 +106,18 @@ datetime #1 https://java2blog.com/check-if-date-is-greater-than-today-python/
 
 datetime #2 https://stackoverflow.com/questions/63513596/python-get-same-day-last-year
 
+datetime #3 https://stackoverflow.com/questions/546321/how-do-i-calculate-the-date-six-months-from-the-current-date-using-the-datetime
+
+datetime #4 https://appdividend.com/2023/01/07/typeerror-cant-compare-offset-naive-and-offset-aware-datetimes/
+
 replacing the C in Channel ID with U so that it becomes the all channel videos playlist
 https://stackoverflow.com/questions/41752946/replacing-a-character-from-a-certain-index
 
 main func reference https://realpython.com/python-main-function/
+
+switch statement for timeframe choice https://www.freecodecamp.org/news/python-switch-statement-switch-case-example/
+
+itemgetter https://stackoverflow.com/questions/72899/how-do-i-sort-a-list-of-dictionaries-by-a-value-of-the-dictionarygit 
 
 
 ### __Content__
