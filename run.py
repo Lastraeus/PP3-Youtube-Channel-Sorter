@@ -29,7 +29,6 @@ api_service_name = "youtube"
 api_version = "v3"
 # API key
 DEVELOPER_KEY = api_key_data["key1"]
-print(DEVELOPER_KEY)
 
 # print("Welcome to the YouTube Channel Sorter")
 # inputted_url = input("Please input a channel URL \n")
