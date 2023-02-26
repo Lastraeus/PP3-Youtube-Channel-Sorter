@@ -1,11 +1,9 @@
-"""
-Query template from 
-https://medium.com/mcd-unison/youtube-data-api-v3-in
--python-tutorial-with-examples-e829a25d2ebd#5999
-"""
 import googleapiclient.discovery
 import pytube  # specifically pip install git+https://github.com/felipeucelli/pytube.git for modern channelurl parsing
-import json
+import json, datetime
+
+from dateutil.relativedelta import relativedelta
+from dateutil import parser
 
 test_channel1 = "https://www.youtube.com/@kaptainkristian"
 test_channel2 = "https://www.youtube.com/user/billwurtz"
@@ -32,8 +30,18 @@ try:
 except:
     print("That is not a valid YouTube Channel URL")
 
+def assess_oldest_date(in_date, timeframe):
+    now = datetime.datetime.now()
+    check_date = parser.parse(in_date).date()
+    delta = relativedelta(check_date, now)
+    print(delta)
+
+
+
+
 if channel_all_vid_playlist_id:
     youtube = googleapiclient.discovery.build(api_service_name, api_version, developerKey = DEVELOPER_KEY)
+
     # 'request' variable is the only thing you must change
     # depending on the resource and method you need to use
     # in your query
@@ -50,4 +58,6 @@ if channel_all_vid_playlist_id:
     returned_videos = response["items"]
     last_video_on_page = returned_videos[-1]
     oldest_publishedDate_on_page = last_video_on_page["snippet"]["publishedAt"]
+
     print(f'Oldest Video on this results page was posted {oldest_publishedDate_on_page}')
+    print(assess_oldest_date(oldest_publishedDate_on_page, 0))
