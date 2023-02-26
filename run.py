@@ -14,10 +14,8 @@ test_channel3 = "https://www.youtube.com/@billwurtzwrongname"
 f = open("creds.json")
 api_key_data = json.load(f)
 
-
-
 try:
-    channel = pytube.Channel(test_channel1)
+    channel = pytube.Channel(test_channel2)
     channel_id = channel.channel_id
     print(channel_id)
 except:
@@ -36,14 +34,19 @@ DEVELOPER_KEY = api_key_data["key1"]
 
 # API client
 youtube = googleapiclient.discovery.build(api_service_name, api_version, developerKey = DEVELOPER_KEY)
-# # 'request' variable is the only thing you must change
-# # depending on the resource and method you need to use
-# # in your query
-# request = None #add request here when channel ID in hand
+# 'request' variable is the only thing you must change
+# depending on the resource and method you need to use
+# in your query
+channel_all_vid_playlist = channel_id[:1] + "U" + channel_id[1 + 1:]  #https://stackoverflow.com/questions/41752946/replacing-a-character-from-a-certain-index
+print(channel_all_vid_playlist)
 
+request = youtube.playlistItems().list(        
+    part="snippet,contentDetails",
+    maxResults=50,
+    playlistId=channel_all_vid_playlist
+)
 
-
-# # Query execution
-# response = request.execute()
-# # Print the results
-# print(response)
+# Query execution
+response = request.execute()
+last_video_on_page = response["items"][-1]["snippet"]["publishedAt"]
+print(last_video_on_page)
