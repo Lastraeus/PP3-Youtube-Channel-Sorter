@@ -119,6 +119,11 @@ switch statement for timeframe choice https://www.freecodecamp.org/news/python-s
 
 itemgetter https://stackoverflow.com/questions/72899/how-do-i-sort-a-list-of-dictionaries-by-a-value-of-the-dictionarygit 
 
+get views https://github.com/CoreyMSchafer/code_snippets/blob/master/Python/YouTube-API/03-Most-Popular-Video-Playlist/start.py
+
+
+divide list into chunks https://www.geeksforgeeks.org/break-list-chunks-size-n-python/
+
 
 ### __Content__
 __Text Content__

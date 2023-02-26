@@ -5,6 +5,7 @@ import pytube  # specifically pip install git+https://github.com/felipeucelli/py
 from dateutil.relativedelta import relativedelta
 from dateutil import parser
 from dateutil import tz
+from operator import itemgetter
 
 # INITIAL VARIABLES
 api_service_name = "youtube"
@@ -20,6 +21,9 @@ full_vid_list = []
 last_page_token = ""
 need_next_page = False
 youtube = googleapiclient.discovery.build(api_service_name, api_version, developerKey = DEVELOPER_KEY)
+vid_ids = []
+vids_to_show = []
+
 
 def print_initial_screen():
     print("Welcome to the YouTube Channel Sorter")
@@ -146,6 +150,49 @@ def is_next_page_needed(last_video_date, target_date):
         return False
 
 
+def sort_and_trim_vid_list(list_of_dicts):
+    newlist = sorted(list_dicts, key=itemgetter('name'), reverse=True)
+
+
+def grab_ids_in_date(target_date):
+    for item in full_vid_list:
+        item_datetime = parser.parse(item["snippet"]["publishedAt"])
+        if item_datetime > target_date:
+            vid_ids.append(item['contentDetails']['videoId'])
+
+
+def query_vids(vid_ids):
+    nextPageToken = None
+    while True:
+        vid_request = youtube.videos().list(
+            part="snippet,statistics",
+            id=','.join(vid_ids),
+            maxResults=50
+        )
+
+        vid_response = vid_request.execute()
+
+        for item in vid_response['items']:
+            vid_views = item['statistics']['viewCount']
+
+            vid_id = item['id']
+            title = item["snippet"]["title"]
+            yt_link = f'https://youtu.be/{vid_id}'
+
+            vids_to_show.append(
+                {
+                    'views': int(vid_views),
+                    'title': title,
+                    'url': yt_link
+                }
+            )
+
+        nextPageToken = vid_response.get('nextPageToken')
+
+        if not nextPageToken:
+            break
+
+
 def main():
     print_initial_screen()
     channel_playlist_id = channel_prompt()
@@ -157,7 +204,7 @@ def main():
     total_channel_vids = get_total_vids(r)
     oldest_response_datetime = get_oldest_date_in_response(r)
     add_response_vids_to_list(r)
-    while is_next_page_needed(oldest_response_datetime, target_date):g
+    while is_next_page_needed(oldest_response_datetime, target_date):
         if r["nextPageToken"]:
             token = r["nextPageToken"]
             r = query_api_next_page(saved_playlist_id, token)
@@ -166,11 +213,22 @@ def main():
             save_data_to_json(r, "latest_response_test")
         else:
             break
+    grab_ids_in_date(target_date)
+    query_vids(vid_ids)
+    vids_to_show.sort(key=lambda vid: vid['views'], reverse=True)
+    for video in vids_to_show[:10]:
+        print(video["title"])
+        print("Views: ", video['views'])
+        print(video['url'])
 
-    save_data_to_json(r, "response_test")
+
+
+    # save_data_to_json(r, "response_test")
     print(f'The length of full_vid_list is {len(full_vid_list)}')
     print(f'There are {total_channel_vids} in the channel')
     print(f'Oldest Video in this 50 last uploaded to channel\nwas posted {oldest_response_datetime}')
+
+
     
 
   
