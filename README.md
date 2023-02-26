@@ -101,7 +101,17 @@ NA
 
 ## __Credits__
 Query template from https://medium.com/mcd-unison/youtube-data-api-v3-in-python-tutorial-with-examples-e829a25d2ebd#5999
+
 datetime #1 https://java2blog.com/check-if-date-is-greater-than-today-python/
+
+datetime #2 https://stackoverflow.com/questions/63513596/python-get-same-day-last-year
+
+replacing the C in Channel ID with U so that it becomes the all channel videos playlist
+https://stackoverflow.com/questions/41752946/replacing-a-character-from-a-certain-index
+
+main func reference https://realpython.com/python-main-function/
+
+
 ### __Content__
 __Text Content__
 
