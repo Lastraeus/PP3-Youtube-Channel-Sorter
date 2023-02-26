@@ -10,14 +10,15 @@ import json
 test_channel1 = "https://www.youtube.com/@kaptainkristian"
 test_channel2 = "https://www.youtube.com/@billwurtz"
 test_channel3 = "https://www.youtube.com/@billwurtzwrongname"
+test_channel4 = "https://www.youtube.com/@scottmanley/videos"
 
 f = open("creds.json")
 api_key_data = json.load(f)
 
 try:
-    channel = pytube.Channel(test_channel2)
+    channel = pytube.Channel(test_channel4)
+    print("Channel Found")
     channel_id = channel.channel_id
-    print(channel_id)
 except:
     print("That is not a valid youtube URL")
 
@@ -38,7 +39,6 @@ youtube = googleapiclient.discovery.build(api_service_name, api_version, develop
 # depending on the resource and method you need to use
 # in your query
 channel_all_vid_playlist = channel_id[:1] + "U" + channel_id[1 + 1:]  #https://stackoverflow.com/questions/41752946/replacing-a-character-from-a-certain-index
-print(channel_all_vid_playlist)
 
 request = youtube.playlistItems().list(        
     part="snippet,contentDetails",
@@ -48,5 +48,7 @@ request = youtube.playlistItems().list(
 
 # Query execution
 response = request.execute()
-last_video_on_page = response["items"][-1]["snippet"]["publishedAt"]
-print(last_video_on_page)
+returned_videos = response["items"]
+last_video_on_page = returned_videos[-1]
+oldest_publishedDate_on_page = last_video_on_page["snippet"]["publishedAt"]
+print(oldest_publishedDate_on_page)
