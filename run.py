@@ -189,7 +189,7 @@ def query_vids(vid_ids):
                     {
                         'views': int(vid_views),
                         'title': title,
-                        'url': yt_link
+                        'url': yt_link,
                         "published": published
                     }
                 )
