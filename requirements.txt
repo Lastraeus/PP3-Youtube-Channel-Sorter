@@ -12,3 +12,4 @@ pyparsing==3.0.9
 pytube @ git+https://github.com/felipeucelli/pytube.git@a8cc41811fd921dbebc7c1d88e6c518a4115def3
 rsa==4.9
 uritemplate==4.1.1
+python-dateutil==2.8.2 
