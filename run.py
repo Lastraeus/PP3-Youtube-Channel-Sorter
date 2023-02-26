@@ -180,7 +180,7 @@ def query_vids(vid_ids):
 
             for item in vid_response['items']:
                 vid_views = item['statistics']['viewCount']
-
+                published = item["snippet"]["publishedAt"]
                 vid_id = item['id']
                 title = item["snippet"]["title"]
                 yt_link = f'https://youtu.be/{vid_id}'
@@ -190,6 +190,7 @@ def query_vids(vid_ids):
                         'views': int(vid_views),
                         'title': title,
                         'url': yt_link
+                        "published": published
                     }
                 )
 
@@ -216,7 +217,6 @@ def split_vid_list_query(list_of_ids_lists):
 
             for item in vid_response['items']:
                 vid_views = item['statistics']['viewCount']
-
                 vid_id = item['id']
                 title = item["snippet"]["title"]
                 published = item["snippet"]["publishedAt"]
