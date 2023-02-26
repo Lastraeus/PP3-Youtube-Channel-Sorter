@@ -1,1 +1,14 @@
-# Your requirements go here
+cachetools==5.3.0
+google-api-core==2.11.0
+google-api-python-client==2.79.0
+google-auth==2.16.1
+google-auth-httplib2==0.1.0
+googleapis-common-protos==1.58.0
+httplib2==0.21.0
+protobuf==4.22.0
+pyasn1==0.4.8
+pyasn1-modules==0.2.8
+pyparsing==3.0.9
+pytube @ git+https://github.com/felipeucelli/pytube.git@a8cc41811fd921dbebc7c1d88e6c518a4115def3
+rsa==4.9
+uritemplate==4.1.1

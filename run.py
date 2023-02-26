@@ -4,7 +4,7 @@ https://medium.com/mcd-unison/youtube-data-api-v3-in
 -python-tutorial-with-examples-e829a25d2ebd#5999
 """
 import googleapiclient.discovery
-import pytube  #specifically pip install git+https://github.com/felipeucelli/pytube.git for modern channelurl parsing
+import pytube  # specifically pip install git+https://github.com/felipeucelli/pytube.git for modern channelurl parsing
 import secret_keys
 
 test_channel1 = "https://www.youtube.com/@kaptainkristian"
@@ -13,7 +13,7 @@ test_channel3 = "https://www.youtube.com/@billwurtzwrongname"
 
 
 try:
-    channel = pytube.Channel(test_channel3)
+    channel = pytube.Channel(test_channel1)
     channel_id = channel.channel_id
     print(channel_id)
 except:
