@@ -7,7 +7,7 @@ from dateutil import parser
 from dateutil import tz
 from operator import itemgetter
 
-# INITIAL VARIABLES
+# INITIAL VARIABLES -------------------------------------------------------------------------------
 api_service_name = "youtube"
 api_version = "v3"
 f = open("creds.json")
@@ -23,8 +23,9 @@ need_next_page = False
 youtube = googleapiclient.discovery.build(api_service_name, api_version, developerKey = DEVELOPER_KEY)
 vid_ids = []
 vids_to_show = []
+eighty_hashes = "--------------------------------------------------------------------------------"
 
-
+# Welcome and Prompt Fucntion Section -------------------------------------------------------------
 def print_initial_screen():
     print("Welcome to the YouTube Channel Sorter")
 
@@ -79,31 +80,10 @@ def calculate_past_timeframes(input_letter):
         return one_week_ago
 
     else:
-        print("Unknown TimeFrame passed")
+        print("Unknown Timeframe passed")
 
 
-def query_api(playlist_id):
-    request = youtube.playlistItems().list(        
-        part="snippet,contentDetails",
-        maxResults=50,
-        playlistId=playlist_id
-    )
-    print("Preparing to return channel video data")
-    r = request.execute()
-    return r
-
-def query_api_next_page(playlist_id, token):
-    request = youtube.playlistItems().list(        
-        part="snippet,contentDetails",
-        maxResults=50,
-        playlistId=playlist_id,
-        pageToken=token
-    )
-    print("Preparing to return MORE channel video data")
-    r = request.execute()
-    return r
-
-
+# Response Parsing Section ------------------------------------------------------------------------
 def get_total_vids(response):
     total_channel_videos = response["pageInfo"]["totalResults"]
     return total_channel_videos
@@ -120,6 +100,7 @@ def get_oldest_date_in_response(response):
     oldest_datetime = parser.parse(last_video_on_page["snippet"]["publishedAt"])
     return oldest_datetime
 
+
 def add_response_vids_to_list(response):
     returned_videos = response["items"]
 
@@ -127,13 +108,6 @@ def add_response_vids_to_list(response):
         full_vid_list.append(i)
 
     save_data_to_json(full_vid_list, "test_vid_list")
-
-
-def save_data_to_json(data, filename):
-    jsonString = json.dumps(full_vid_list)
-    jsonFile = open(f'{filename}.json', "w")
-    jsonFile.write(jsonString)
-    jsonFile.close()
 
 
 def date_format_to_google_dates(target_date, SAMPLE_RETURN_DATE):
@@ -161,10 +135,54 @@ def grab_ids_in_date(target_date):
             vid_ids.append(item['contentDetails']['videoId'])
 
 
+# Output Results After Searching/Parsing Section --------------------------------------------------------------
+def output_results(results, response, last_date):
+    total_channel_vids = get_total_vids(response)
+    vids_to_show.sort(key=lambda vid: vid['views'], reverse=True)
+    print(eighty_hashes)  # default width of template terminal
+    print(f'Channel has {total_channel_vids} visible videos\n')
+    print(f'Oldest Video in Selected Timeframe uploaded to channel was posted:')
+    print(last_date)
+    print(eighty_hashes)
+    for video in vids_to_show[:10]:
+        print(video["title"])
+        print(f'Views: {video["views"]}, Published: {video["published"]}')
+        print(video['url'], "\n")
+
+# Utility Function Section ------------------------------------------------------------------------
+def save_data_to_json(data, filename):
+    jsonString = json.dumps(full_vid_list)
+    jsonFile = open(f'{filename}.json', "w")
+    jsonFile.write(jsonString)
+    jsonFile.close()
+
+
 def divide_chunks(l, n):
     # looping till length l
     for i in range(0, len(l), n):
         yield l[i:i + n]
+
+
+# Query API Functions Section ---------------------------------------------------------------------
+def query_api(playlist_id):
+    request = youtube.playlistItems().list(        
+        part="snippet,contentDetails",
+        maxResults=50,
+        playlistId=playlist_id
+    )
+    r = request.execute()
+    return r
+
+def query_api_next_page(playlist_id, token):
+    request = youtube.playlistItems().list(        
+        part="snippet,contentDetails",
+        maxResults=50,
+        playlistId=playlist_id,
+        pageToken=token
+    )
+    r = request.execute()
+    return r
+
 
 def query_vids(vid_ids):
     nextPageToken = None
@@ -237,15 +255,16 @@ def split_vid_list_query(list_of_ids_lists):
                 break
 
 
+# Main() Section ----------------------------------------------------------------------------------
 def main():
     print_initial_screen()
     channel_playlist_id = channel_prompt()
     saved_playlist_id = channel_playlist_id
-    print(f'saved_playlist_id is {saved_playlist_id}')
     target_date = timeframe_prompt()
     target_date = date_format_to_google_dates(target_date, SAMPLE_RETURN_DATE)
     r = query_api(channel_playlist_id)
-    total_channel_vids = get_total_vids(r)
+    # save_data_to_json(r, "latest_response_test")
+    original_response = r #Save for general channel/playlist metadata parsing
     oldest_response_datetime = get_oldest_date_in_response(r)
     add_response_vids_to_list(r)
     while is_next_page_needed(oldest_response_datetime, target_date):
@@ -254,32 +273,17 @@ def main():
             r = query_api_next_page(saved_playlist_id, token)
             oldest_response_datetime = get_oldest_date_in_response(r)
             add_response_vids_to_list(r)
-            save_data_to_json(r, "latest_response_test")
+            # save_data_to_json(r, "latest_response_test")
         else:
             break
     grab_ids_in_date(target_date)
     query_vids(vid_ids)
-    vids_to_show.sort(key=lambda vid: vid['views'], reverse=True)
-    print("---------------------------------------------------------------------")
-    for video in vids_to_show[:10]:
-        print(video["title"])
-        print(f'Views: {video["views"]}, Published: {video["published"]}')
-        print(video['url'])
+    output_results(vids_to_show, original_response, oldest_response_datetime)
 
-
-
-    # save_data_to_json(r, "response_test")
-    print(f'The length of full_vid_list is {len(full_vid_list)}')
-    print(f'There are {total_channel_vids} in the channel')
-    print(f'Oldest Video in this 50 last uploaded to channel\nwas posted {oldest_response_datetime}')
-
-
-    
-
-  
 if __name__ == "__main__":
     main()
 
+# Channels on hand to test app with ---------------------------------------------------------------
 # test_channel1 = "https://www.youtube.com/@kaptainkristian"
 # test_channel2 = "https://www.youtube.com/@quill18"
 # test_channel4 = "https://www.youtube.com/user/billwurtz"
