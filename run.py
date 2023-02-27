@@ -32,7 +32,7 @@ def print_initial_screen():
     print(logo1)
     print("Welcome to the YouTube Channel Sorter")
     print("Created by Cian Lane\n")
-    print("See https://github.com/Lastraeus/PP3-Youtube-Channel-Sorter \n for readme and full credits\n\n")
+    print("See https://github.com/Lastraeus/PP3-Youtube-Channel-Sorter \nfor README and full credits\n\n")
 
 
 def channel_prompt():
@@ -66,7 +66,6 @@ Last (Y)ear, Last (S)ix Months, Last (M)onth, Last (W)eek
 
     print(f'{selected_timeframe} is not in {ACCEPTED_TIMEFRAMES}')
     print("please enter one of the bracketed letters to select")
-    timeframe_prompt()
 
 
 def calculate_past_timeframes(input_letter):
@@ -145,7 +144,8 @@ def output_results(results, response, last_date):
     total_channel_vids = get_total_vids(response)
     vids_to_show.sort(key=lambda vid: vid['views'], reverse=True)
     print(eighty_hashes)  # default width of template terminal
-    print(f'Channel has {total_channel_vids} visible videos\n')
+    print(f'Channel has {total_channel_vids} total visible videos\n')
+    print(f'Channel has {len(vids_to_show)} videos in selected timeframe\n')
     print(f'Oldest Video in Selected Timeframe uploaded to channel was posted:')
     print(last_date)
     print(eighty_hashes)
@@ -295,7 +295,9 @@ def main():
     while r == None:
         channel_playlist_id = channel_prompt()
         saved_playlist_id = channel_playlist_id
-        target_date = timeframe_prompt()
+        target_date = None
+        while target_date == None:
+            target_date = timeframe_prompt()
         target_date = date_format_to_google_dates(target_date, SAMPLE_RETURN_DATE)
         r = query_api(channel_playlist_id)
     # save_data_to_json(r, "latest_response_test")
