@@ -7,6 +7,7 @@ from dateutil.relativedelta import relativedelta
 from dateutil import parser
 from dateutil import tz
 from operator import itemgetter
+from ascii import logo1
 
 # INITIAL VARIABLES -------------------------------------------------------------------------------
 api_service_name = "youtube"
@@ -28,7 +29,10 @@ eighty_hashes = "---------------------------------------------------------------
 
 # Welcome and Prompt Fucntion Section -------------------------------------------------------------
 def print_initial_screen():
+    print(logo1)
     print("Welcome to the YouTube Channel Sorter")
+    print("Created by Cian Lane\n")
+    print("See https://github.com/Lastraeus/PP3-Youtube-Channel-Sorter \n for readme and full credits\n\n")
 
 
 def channel_prompt():
