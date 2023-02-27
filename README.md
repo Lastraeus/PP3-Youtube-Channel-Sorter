@@ -7,11 +7,14 @@ To create a terminal based app using Python that prompts the user to input a You
 
 Youtube does not by default allow you to see a channel's top videos within a certain timeframe. You can only sort by;
 
-    "Most recent" which requires you to comb through the list yourself for videos with views more than average for that period
+    "Most recent" 
+    
+  which requires you to comb through the list yourself for videos with views more than average for that period
 
 and
 
-    "Most Popular" which will sort every video on their channel back to it's inception, by views. The problem being that videos might be unfairly biased with higher views.
+    "Most Popular" 
+  which will sort every video on their channel back to it's inception, by views. The problem being that videos from way back often by default have many more views than more recent ones.
 
 The purpose of this project, is to be able to query this application and have it (however slowly) automate this process of searching for you.
 
@@ -20,18 +23,18 @@ __Understanding the Target Problem__
 
 Initially I investigated the official google API qutoas for searching with a given api key were quite strict.
 https://developers.google.com/youtube/v3/determine_quota_cost
-You are only allowed 100 searches a day which was possibly too strict for this projects needs during development. I then found https://stackoverflow.com/questions/18953499/youtube-api-to-fetch-all-videos-on-a-channel
+You are only allowed 100 "searches" a day which was possibly too strict for this projects needs during development. I then found https://stackoverflow.com/questions/18953499/youtube-api-to-fetch-all-videos-on-a-channel
 
 and
 
 https://stackoverflow.com/questions/74348727/youtube-data-api-get-channel-by-handle
 
-which led me to piece together a plan of using the official api. Possibly with a slower pytube version as a backup.
+which led me to piece together a plan of using the official api using the "lists" query, instead, of which you get 10,000 querys per api key, instead of 100. Possibly with a slower pytube version as a backup.
 
 I also investigated using this branch of pytube
 https://github.com/felipeucelli/pytube
 which had been updated to handle the newwer @youtube handles.
-So basic testing of this showed that it was working but quite slow.
+So basic testing of this showed that it was working but quite slow to parse all videos in a channel (it doesn't use a official api query), but it's channel url parsing into channel ID functionality was undeniable.
 
 Also looked at were
 
@@ -42,11 +45,13 @@ and
 
 https://github.com/alexmercerind/youtube-search-python which was deprecated for over 8 months
 
-![Official Calculation Weights and rules](docs/readme-images/target-rules-from-official-assessment-guide.png)
-
 __Audience Needs/Stories__
 
-"It's really unfortunate that google doesn't let you sort like Reddit does within a channel"
+'It's really unfortunate that google doesn't let you sort like Reddit does within a channel'
+
+'When a channel has been running for years, I wish I could sort by the best of their more "modern" videos.'
+
+'You can sometimes do it by searching the channel name in youtubes own search and using their filters, but often times it gets contaminated with other channels results and playlists instead of videos, or often the search is just plain missing lots of the videos' see https://www.youtube.com/results?search_query=%40bbcnews&sp=CAMSAggF compared to looking at https://www.youtube.com/@BBC/videos
 
 __Search For Similar Apps__
 see above for now - TBD
@@ -60,7 +65,7 @@ This would wait for the user to enter a channel name, and optionally, a timefram
 ### __Color Scheme__
 Color Scheme tbd after initial testing.
 
-  ![Coolor Website palette](docs/readme-images/coolors-color-palette.png)
+
 
 
 
@@ -122,7 +127,9 @@ itemgetter https://stackoverflow.com/questions/72899/how-do-i-sort-a-list-of-dic
 get views https://github.com/CoreyMSchafer/code_snippets/blob/master/Python/YouTube-API/03-Most-Popular-Video-Playlist/start.py
 
 
-divide list into chunks https://www.geeksforgeeks.org/break-list-chunks-size-n-python/
+divide list into chunks (for video querys using vidID lists more than 50 items long) https://www.geeksforgeeks.org/break-list-chunks-size-n-python/
+
+playlist not found and other error handling https://stackoverflow.com/questions/23945784/how-to-manage-google-api-errors-in-python
 
 
 ### __Content__
