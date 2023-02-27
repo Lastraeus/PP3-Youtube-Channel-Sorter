@@ -56,6 +56,8 @@ Last (Y)ear, Last (S)ix Months, Last (M)onth, Last (W)eek
     selected_timeframe = selected_timeframe.lower()
     if selected_timeframe in ACCEPTED_TIMEFRAMES:
         tf = calculate_past_timeframes(selected_timeframe)
+        print("Loading Selected Results")
+        print("This can take a minute if the channel has many videos")
         return tf
 
     print(f'{selected_timeframe} is not in {ACCEPTED_TIMEFRAMES}')
@@ -154,6 +156,12 @@ def handle_error_reason(error_reason):
         print("Unfortunately this channel/playlist doesn't seem to have any videos")
         print("Please try again or choose another")
         print("This time... maybe try one with videos that need sorting\n")
+    
+    if "quota" in error_reason.lower():
+        if (DEVELOPER_KEY == api_key_data["key1"]):
+            DEVELOPER_KEY = api_key_data["key2"]
+        else:
+            print("Issue with API Quota Limit. Maybe Try Again Tomorrow.")
 
 
 # Utility Function Section ------------------------------------------------------------------------
