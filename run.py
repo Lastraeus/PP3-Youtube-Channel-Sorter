@@ -2,6 +2,7 @@ import json
 import datetime
 import googleapiclient.discovery
 import pytube  # specifically pip install git+https://github.com/felipeucelli/pytube.git for modern channelurl parsing
+from googleapiclient.errors import HttpError
 from dateutil.relativedelta import relativedelta
 from dateutil import parser
 from dateutil import tz
@@ -117,10 +118,8 @@ def date_format_to_google_dates(target_date, SAMPLE_RETURN_DATE):
 
 def is_next_page_needed(last_video_date, target_date):
     if last_video_date > target_date:
-        print('The Last Date on page is newer than target date')
         return True
     else:
-        print('The Last Date on page is older than target date')
         return False
 
 
@@ -149,6 +148,14 @@ def output_results(results, response, last_date):
         print(f'Views: {video["views"]}, Published: {video["published"]}')
         print(video['url'], "\n")
 
+
+def handle_error_reason(error_reason):
+    if error_reason == "playlistNotFound":
+        print("Unfortunately this channel/playlist doesn't seem to have any videos")
+        print("Please try again or choose another")
+        print("This time... maybe try one with videos that need sorting\n")
+
+
 # Utility Function Section ------------------------------------------------------------------------
 def save_data_to_json(data, filename):
     jsonString = json.dumps(full_vid_list)
@@ -170,8 +177,22 @@ def query_api(playlist_id):
         maxResults=50,
         playlistId=playlist_id
     )
-    r = request.execute()
-    return r
+    
+
+    # If the error is a rate limit or connection error,
+    # wait and try again.
+    # if err.resp.status in [403, 500, 503]:
+    #     time.sleep(5)
+    # else: raise
+    try:
+        r = request.execute()
+        return r
+    except HttpError as err:
+        if err.resp.get('content-type', '').startswith('application/json'):
+            reason = json.loads(err.content).get('error').get('errors')[0].get('reason')
+            handle_error_reason(reason)
+            return None
+
 
 def query_api_next_page(playlist_id, token):
     request = youtube.playlistItems().list(        
@@ -258,11 +279,13 @@ def split_vid_list_query(list_of_ids_lists):
 # Main() Section ----------------------------------------------------------------------------------
 def main():
     print_initial_screen()
-    channel_playlist_id = channel_prompt()
-    saved_playlist_id = channel_playlist_id
-    target_date = timeframe_prompt()
-    target_date = date_format_to_google_dates(target_date, SAMPLE_RETURN_DATE)
-    r = query_api(channel_playlist_id)
+    r = None
+    while r == None:
+        channel_playlist_id = channel_prompt()
+        saved_playlist_id = channel_playlist_id
+        target_date = timeframe_prompt()
+        target_date = date_format_to_google_dates(target_date, SAMPLE_RETURN_DATE)
+        r = query_api(channel_playlist_id)
     # save_data_to_json(r, "latest_response_test")
     original_response = r #Save for general channel/playlist metadata parsing
     oldest_response_datetime = get_oldest_date_in_response(r)
