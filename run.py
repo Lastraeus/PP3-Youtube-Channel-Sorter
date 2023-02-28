@@ -28,8 +28,7 @@ need_next_page = False
 youtube = googleapiclient.discovery.build(api_service_name, api_version, developerKey = DEVELOPER_KEY)
 vid_ids = []
 vids_in_target_time = []
-eighty_hashes = "--------------------------------------------------------------------------------"
-
+eighty_hashes = "-" * 80
 # Welcome and Prompt Fucntion Section -------------------------------------------------------------
 def print_initial_screen():
     print(logo1)
@@ -98,7 +97,7 @@ def get_total_channel_vids(response):
     return total_channel_videos
 
 
-def get_total_queried_vids(vids_in_target_time):
+def get_total_vids_in_timeframe(vids_in_target_time):
     result = len(vids_in_target_time)
     return result
 
@@ -162,36 +161,81 @@ def get_credits_used(total_videos):
 # Output Results After Searching/Parsing Section --------------------------------------------------------------
 def output_results(results, response, last_date):
     total_channel_vids = get_total_channel_vids(response)
-    total_queried_vids = get_total_queried_vids(vids_in_target_time)
-    quota_used = get_credits_used(total_queried_vids)
+    total_vids_in_timeframe = get_total_vids_in_timeframe(vids_in_target_time)
+    quota_used = get_credits_used(total_vids_in_timeframe)
 
-    vids_in_target_time.sort(key=lambda vid: vid['views'], reverse=True)
+    DEFAULT_SORT_ORDER = 'views'
+    DEFAULT_NUM_OF_RESULTS = 5
 
+    vids_in_target_time.sort(key=lambda vid: vid[DEFAULT_SORT_ORDER], reverse=True)
+
+    output_header_string = make_header_string(
+        total_channel_vids,
+        total_vids_in_timeframe,
+        last_date,
+        quota_used)
+
+    terminal_output_results_string = make_terminal_results_string(
+        output_header_string,
+        DEFAULT_NUM_OF_RESULTS
+        )
+
+    full_output_string = make_full_results_string(output_header_string)
+
+    print(f'Top {DEFAULT_NUM_OF_RESULTS} Results:')
+    print(eighty_hashes)
+    print(terminal_output_results_string)
+    # TODO Awaiting Google Drive integration
+    # print('Would you like to save the full list of results to a text file?')
+    # save_file_prompt = input('Enter (Y)es if so\n')
+    # if save_file_prompt.lower() == "y": # TODO pyinput plus?
+    #     string_to_txt_file(full_output_string)
+
+def make_header_string(total_channel_vids, total_vids_in_timeframe, last_date, quota_used):
     output_header_list = []
     output_header_list.append(eighty_hashes)  # default width of template terminal
     output_header_list.append(f'Channel has {total_channel_vids} total visible videos\n')
-    output_header_list.append(f'Channel has {total_queried_vids} videos in selected timeframe\n')
+    output_header_list.append(f'Channel has {total_vids_in_timeframe} videos in selected timeframe\n')
     output_header_list.append(f'Oldest Video in Selected Timeframe uploaded to channel was posted:')
     output_header_list.append(f'{last_date}')
     output_header_list.append(f'Total API Quota Credits used: {quota_used}')
     output_header_list.append(eighty_hashes)
     output_header_string = "\n".join(output_header_list)
+    return output_header_string
 
-    num_of_output_results = 5
 
+def make_terminal_results_string(output_header_string, num_of_output_results=5,):
     output_results_list = []
+
     for video in vids_in_target_time[:num_of_output_results]:
         output_results_list.append(video["title"])
         output_results_list.append(f'Views: {video["views"]}, Published: {video["published"]}')
         output_results_list.append(f'{video["url"]}\n')
-    output_results_string = "\n".join(output_results_list)
+    terminal_output_results_string = "\n".join(output_results_list)
 
-    output_part_list = []
-    output_part_list.append(output_header_string)
-    output_part_list.append(output_results_string)
+    terminal_output_part_list = []
+    terminal_output_part_list.append(output_header_string)
+    terminal_output_part_list.append(terminal_output_results_string)
+    terminal_output_string = "\n".join(terminal_output_part_list)
 
-    full_output_string = "\n".join(output_part_list)
-    print(full_output_string)
+    return terminal_output_string
+
+
+def make_full_results_string(output_header_string):
+    output_results_list = []
+
+    for video in vids_in_target_time:
+        output_results_list.append(video["title"])
+        output_results_list.append(f'Views: {video["views"]}, Published: {video["published"]}')
+        output_results_list.append(f'{video["url"]}\n')
+    full_output_results_string = "\n".join(output_results_list)
+
+    full_output_part_list = []
+    full_output_part_list.append(output_header_string)
+    full_output_part_list.append(full_output_results_string)
+    full_output_string = "\n".join(full_output_part_list)
+
+    return full_output_string
 
 
 def handle_error_reason(error_reason):
@@ -215,7 +259,7 @@ def save_data_to_json(data, filename):
     jsonFile.close()
 
 
-def test_output_to_txt(string):
+def string_to_txt_file(string):
     filenum = 1
     filepath = (f'outputs/test_output{filenum}.txt')
     while exists(filepath):
