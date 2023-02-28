@@ -131,6 +131,10 @@ divide list into chunks (for video querys using vidID lists more than 50 items l
 
 playlist not found and other error handling https://stackoverflow.com/questions/23945784/how-to-manage-google-api-errors-in-python
 
+textfile https://www.pythontutorial.net/python-basics/python-create-text-file/
+
+make output as one string for writing to file or printing
+https://flexiple.com/python/python-append-to-string/
 
 ### __Content__
 __Text Content__

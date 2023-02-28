@@ -3,12 +3,14 @@ import json
 import datetime
 import googleapiclient.discovery
 import pytube  # specifically pip install git+https://github.com/felipeucelli/pytube.git for modern channelurl parsing
+from os.path import exists
 from googleapiclient.errors import HttpError
 from dateutil.relativedelta import relativedelta
 from dateutil import parser
 from dateutil import tz
 from operator import itemgetter
 from ascii import logo1
+
 
 # INITIAL VARIABLES -------------------------------------------------------------------------------
 api_service_name = "youtube"
@@ -161,13 +163,17 @@ def output_results(results, response, last_date):
 
     vids_in_target_time.sort(key=lambda vid: vid['views'], reverse=True)
 
+    output_list = []
+
     print(eighty_hashes)  # default width of template terminal
     print(f'Channel has {total_channel_vids} total visible videos\n')
     print(f'Channel has {total_queried_vids} videos in selected timeframe\n')
     print(f'Oldest Video in Selected Timeframe uploaded to channel was posted:')
-    print(last_date)
+    print(last_date) # TODO update for small lists to vids in target time
     print(f'Total API Quota Credits used: {quota_used}')
     print(eighty_hashes)
+    num_of_output_results
+    print()
     for video in vids_in_target_time[:10]:
         print(video["title"])
         print(f'Views: {video["views"]}, Published: {video["published"]}')
@@ -193,6 +199,16 @@ def save_data_to_json(data, filename):
     jsonFile = open(f'{filename}.json', "w")
     jsonFile.write(jsonString)
     jsonFile.close()
+
+
+def test_output_to_txt(string):
+    filenum = 1
+    filepath = (f'outputs/test_output{filenum}.txt')
+    while exists(filepath):
+        filenum = filenum + 1
+        filepath = (f'outputs/test_output{filenum}.txt')
+    with open(filepath, 'w') as f:
+        f.write(string)
 
 
 def divide_chunks(l, n):
@@ -334,7 +350,11 @@ def main():
             break
     grab_ids_in_date(target_date)
     query_vids(vid_ids)
-    output_results(vids_in_target_time, original_response, oldest_response_datetime)
+    output_results(
+        vids_in_target_time, 
+        original_response, 
+        oldest_response_datetime
+        )
 
 if __name__ == "__main__":
     main()
