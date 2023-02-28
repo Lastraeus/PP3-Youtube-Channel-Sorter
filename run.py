@@ -26,7 +26,7 @@ full_vid_list = []
 last_page_token = ""
 need_next_page = False
 youtube = googleapiclient.discovery.build(api_service_name, api_version, developerKey = DEVELOPER_KEY)
-vid_ids = []
+vid_id_list = []
 vids_in_target_time = []
 line_string = "-" * 80
 # Welcome and Prompt Fucntion Section -------------------------------------------------------------
@@ -143,7 +143,7 @@ def grab_ids_in_date(target_date):
     for item in full_vid_list:
         item_datetime = parser.parse(item["snippet"]["publishedAt"])
         if item_datetime > target_date:
-            vid_ids.append(item['contentDetails']['videoId'])
+            vid_id_list.append(item['contentDetails']['videoId'])
 
 
 def get_credits_used(total_videos):
@@ -202,7 +202,7 @@ def make_header_string(total_channel_vids, total_vids_in_timeframe, last_date, q
 def make_terminal_results_string(output_header_string, num_of_output_results=3, order='views',):
     terminal_output_part_list = []
 
-    settings = (f'Top {num_of_output_results}Results\nSorted by {order}:\n{line_string}')
+    settings = (f'Top {num_of_output_results} Results\nSorted by {order}:\n{line_string}')
     output_results_list = []
     for video in vids_in_target_time[:num_of_output_results]:
         output_results_list.append(video["title"])
@@ -210,7 +210,6 @@ def make_terminal_results_string(output_header_string, num_of_output_results=3, 
         output_results_list.append(f'{video["url"]}\n')
     terminal_output_results_string = "\n".join(output_results_list)
 
-    
     terminal_output_part_list.append(output_header_string)
     terminal_output_part_list.append(settings)
     terminal_output_part_list.append(terminal_output_results_string)
@@ -259,10 +258,10 @@ def save_data_to_json(data, filename):
 
 def string_to_txt_file(string):
     filenum = 1
-    filepath = (f'outputs/test_output{filenum}.txt')
+    filepath = (f'test/test_output{filenum}.txt')
     while exists(filepath):
         filenum = filenum + 1
-        filepath = (f'outputs/test_output{filenum}.txt')
+        filepath = (f'test/test_output{filenum}.txt')
     with open(filepath, 'w') as f:
         f.write(string)
 
@@ -274,11 +273,12 @@ def divide_chunks(l, n):
 
 
 # Query API Functions Section ---------------------------------------------------------------------
-def query_api(playlist_id):
-    request = youtube.playlistItems().list(        
+def query_playlistitems_api(playlist_id, token=None):
+    play_list_request = youtube.playlistItems().list(        
         part="snippet,contentDetails",
         maxResults=50,
-        playlistId=playlist_id
+        playlistId=playlist_id,
+        pageToken=token
     )
     
     # https://stackoverflow.com/questions/23945784/how-to-manage-google-api-errors-in-python
@@ -288,7 +288,7 @@ def query_api(playlist_id):
     #     time.sleep(5)
     # else: raise
     try:
-        r = request.execute()
+        r = play_list_request.execute()
         return r
     except HttpError as err:
         if err.resp.get('content-type', '').startswith('application/json'):
@@ -297,24 +297,13 @@ def query_api(playlist_id):
             return None
 
 
-def query_api_next_page(playlist_id, token):
-    request = youtube.playlistItems().list(        
-        part="snippet,contentDetails",
-        maxResults=50,
-        playlistId=playlist_id,
-        pageToken=token
-    )
-    r = request.execute()
-    return r
-
-
-def query_vids(vid_ids):
+def query_vids(vid_id_list):
     nextPageToken = None
-    if len(vid_ids) <= 50:
+    if len(vid_id_list) <= 50:
         while True:
             vid_request = youtube.videos().list(
                 part="snippet,statistics",
-                id=','.join(vid_ids),
+                id=','.join(vid_id_list),
                 maxResults=50
             )
 
@@ -341,42 +330,15 @@ def query_vids(vid_ids):
             if not nextPageToken:
                 break
     else:
-        list_of_ids_lists = list(divide_chunks(vid_ids, 50))
-        split_vid_list_query(list_of_ids_lists)
+        list_of_vid_id_lists = list(divide_chunks(vid_id_list, 50))
+        split_vid_list_query(list_of_vid_id_lists)
 
 
-def split_vid_list_query(list_of_ids_lists):
-    for id_list in list_of_ids_lists:
-        nextPageToken = None
-        while True:
-            vid_request = youtube.videos().list(
-                part="snippet,statistics",
-                id=','.join(id_list),
-                maxResults=50
-            )
-
-            vid_response = vid_request.execute()
-
-            for item in vid_response['items']:
-                vid_views = item['statistics']['viewCount']
-                vid_id = item['id']
-                title = item["snippet"]["title"]
-                published = item["snippet"]["publishedAt"]
-                yt_link = f'https://youtu.be/{vid_id}'
-
-                vids_in_target_time.append(
-                    {
-                        'views': int(vid_views),
-                        'title': title,
-                        'url': yt_link,
-                        "published": published
-                    }
-                )
-
-            nextPageToken = vid_response.get('nextPageToken')
-
-            if not nextPageToken:
-                break
+def split_vid_list_query(list_of_vid_id_lists):
+    """Feeds a block of 50 video ids to api to query,
+    due to max of 50 ids submitted per query"""
+    for vid_id_list in list_of_vid_id_lists:
+        query_vids(vid_id_list)
 
 
 # Main() Section ----------------------------------------------------------------------------------
@@ -390,7 +352,7 @@ def main():
         while target_date == None:
             target_date = timeframe_prompt()
         target_date = date_format_to_google_dates(target_date, SAMPLE_RETURN_DATE)
-        r = query_api(channel_playlist_id)
+        r = query_playlistitems_api(channel_playlist_id)
     # save_data_to_json(r, "latest_response_test")
     original_response = r #Save for general channel/playlist metadata parsing
     oldest_response_datetime = get_oldest_date_in_response(r)
@@ -398,14 +360,14 @@ def main():
     while is_next_page_needed(oldest_response_datetime, target_date):
         if r["nextPageToken"]:
             token = r["nextPageToken"]
-            r = query_api_next_page(saved_playlist_id, token)
+            r = query_playlistitems_api(saved_playlist_id, token)
             oldest_response_datetime = get_oldest_date_in_response(r)
             add_response_vids_to_list(r)
             # save_data_to_json(r, "latest_response_test")
         else:
             break
     grab_ids_in_date(target_date)
-    query_vids(vid_ids)
+    query_vids(vid_id_list)
     last_video_date_in_timeframe = get_oldest_date_in_response(vids_in_target_time)
     output_results(
         vids_in_target_time, 
