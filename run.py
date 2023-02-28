@@ -9,8 +9,6 @@ from os.path import exists
 from googleapiclient.errors import HttpError
 from dateutil.relativedelta import relativedelta
 from dateutil import parser
-from dateutil import tz
-from operator import itemgetter
 from ascii import logo1
 
 
