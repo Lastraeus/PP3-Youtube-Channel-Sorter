@@ -28,7 +28,7 @@ need_next_page = False
 youtube = googleapiclient.discovery.build(api_service_name, api_version, developerKey = DEVELOPER_KEY)
 vid_ids = []
 vids_in_target_time = []
-eighty_hashes = "-" * 80
+line_string = "-" * 80
 # Welcome and Prompt Fucntion Section -------------------------------------------------------------
 def print_initial_screen():
     print(logo1)
@@ -139,10 +139,6 @@ def is_next_page_needed(last_video_date, target_date):
         return False
 
 
-# def sort_and_trim_vid_list(list_of_dicts):
-#     newlist = sorted(list_dicts, key=itemgetter('name'), reverse=True)
-
-
 def grab_ids_in_date(target_date):
     for item in full_vid_list:
         item_datetime = parser.parse(item["snippet"]["publishedAt"])
@@ -165,7 +161,7 @@ def output_results(results, response, last_date):
     quota_used = get_credits_used(total_vids_in_timeframe)
 
     DEFAULT_SORT_ORDER = 'views'
-    DEFAULT_NUM_OF_RESULTS = 5
+    DEFAULT_NUM_OF_RESULTS = 3
 
     vids_in_target_time.sort(key=lambda vid: vid[DEFAULT_SORT_ORDER], reverse=True)
 
@@ -177,15 +173,14 @@ def output_results(results, response, last_date):
 
     terminal_output_results_string = make_terminal_results_string(
         output_header_string,
-        DEFAULT_NUM_OF_RESULTS
+        DEFAULT_NUM_OF_RESULTS,
+        DEFAULT_SORT_ORDER
         )
-
-    full_output_string = make_full_results_string(output_header_string)
-
-    print(f'Top {DEFAULT_NUM_OF_RESULTS} Results:')
-    print(eighty_hashes)
+        
     print(terminal_output_results_string)
+    
     # TODO Awaiting Google Drive integration
+    # # full_output_string = make_full_results_string(output_header_string)
     # print('Would you like to save the full list of results to a text file?')
     # save_file_prompt = input('Enter (Y)es if so\n')
     # if save_file_prompt.lower() == "y": # TODO pyinput plus?
@@ -193,28 +188,31 @@ def output_results(results, response, last_date):
 
 def make_header_string(total_channel_vids, total_vids_in_timeframe, last_date, quota_used):
     output_header_list = []
-    output_header_list.append(eighty_hashes)  # default width of template terminal
+    output_header_list.append(line_string)  # default width of template terminal
     output_header_list.append(f'Channel has {total_channel_vids} total visible videos\n')
     output_header_list.append(f'Channel has {total_vids_in_timeframe} videos in selected timeframe\n')
     output_header_list.append(f'Oldest Video in Selected Timeframe uploaded to channel was posted:')
     output_header_list.append(f'{last_date}')
     output_header_list.append(f'Total API Quota Credits used: {quota_used}')
-    output_header_list.append(eighty_hashes)
+    output_header_list.append(line_string)
     output_header_string = "\n".join(output_header_list)
     return output_header_string
 
 
-def make_terminal_results_string(output_header_string, num_of_output_results=5,):
-    output_results_list = []
+def make_terminal_results_string(output_header_string, num_of_output_results=3, order='views',):
+    terminal_output_part_list = []
 
+    settings = (f'Top {num_of_output_results}Results\nSorted by {order}:\n{line_string}')
+    output_results_list = []
     for video in vids_in_target_time[:num_of_output_results]:
         output_results_list.append(video["title"])
         output_results_list.append(f'Views: {video["views"]}, Published: {video["published"]}')
         output_results_list.append(f'{video["url"]}\n')
     terminal_output_results_string = "\n".join(output_results_list)
 
-    terminal_output_part_list = []
+    
     terminal_output_part_list.append(output_header_string)
+    terminal_output_part_list.append(settings)
     terminal_output_part_list.append(terminal_output_results_string)
     terminal_output_string = "\n".join(terminal_output_part_list)
 
