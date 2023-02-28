@@ -167,23 +167,31 @@ def output_results(results, response, last_date):
 
     vids_in_target_time.sort(key=lambda vid: vid['views'], reverse=True)
 
-    output_list = []
+    output_header_list = []
+    output_header_list.append(eighty_hashes)  # default width of template terminal
+    output_header_list.append(f'Channel has {total_channel_vids} total visible videos\n')
+    output_header_list.append(f'Channel has {total_queried_vids} videos in selected timeframe\n')
+    output_header_list.append(f'Oldest Video in Selected Timeframe uploaded to channel was posted:')
+    output_header_list.append(f'{last_date}')
+    output_header_list.append(f'Total API Quota Credits used: {quota_used}')
+    output_header_list.append(eighty_hashes)
+    output_header_string = "\n".join(output_header_list)
 
-    output_list.append(eighty_hashes)  # default width of template terminal
-    output_list.append(f'Channel has {total_channel_vids} total visible videos\n')
-    output_list.append(f'Channel has {total_queried_vids} videos in selected timeframe\n')
-    output_list.append(f'Oldest Video in Selected Timeframe uploaded to channel was posted:')
-    output_list.append(f'{last_date}')
-    output_list.append(f'Total API Quota Credits used: {quota_used}')
-    output_list.append(eighty_hashes)
     num_of_output_results = 5
+
+    output_results_list = []
     for video in vids_in_target_time[:num_of_output_results]:
-        output_list.append(video["title"])
-        output_list.append(f'Views: {video["views"]}, Published: {video["published"]}')
-        output_list.append(f'{video["url"]}\n')
-    
-    output_string = "\n".join(output_list)
-    print(output_string)
+        output_results_list.append(video["title"])
+        output_results_list.append(f'Views: {video["views"]}, Published: {video["published"]}')
+        output_results_list.append(f'{video["url"]}\n')
+    output_results_string = "\n".join(output_results_list)
+
+    output_part_list = []
+    output_part_list.append(output_header_string)
+    output_part_list.append(output_results_string)
+
+    full_output_string = "\n".join(output_part_list)
+    print(full_output_string)
 
 
 def handle_error_reason(error_reason):
