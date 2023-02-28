@@ -2,7 +2,9 @@ import math
 import json 
 import datetime
 import googleapiclient.discovery
-import pytube  # specifically pip install git+https://github.com/felipeucelli/pytube.git for modern channelurl parsing
+import pytube 
+"""specifically https://github.com/felipeucelli/pytube.git
+for modern channelurl parsing"""
 from os.path import exists
 from googleapiclient.errors import HttpError
 from dateutil.relativedelta import relativedelta
@@ -18,9 +20,9 @@ api_version = "v3"
 f = open("creds.json")
 api_key_data = json.load(f)
 DEVELOPER_KEY = api_key_data["key1"]
-SAMPLE_RETURN_DATE = parser.parse("2022-09-19T18:08:46Z")  #used to get correct timezone for comparison
+SAMPLE_RETURN_DATE = parser.parse("2022-09-19T18:08:46Z")  # used to get correct timezone for comparison
 ACCEPTED_TIMEFRAMES = ["y", "s", "m", "w"]
-live_now = datetime.datetime.now  #run as live_now()
+live_now = datetime.datetime.now  # run as live_now()
 api_response_meta = {}
 full_vid_list = []
 last_page_token = ""
@@ -28,8 +30,13 @@ need_next_page = False
 youtube = googleapiclient.discovery.build(api_service_name, api_version, developerKey = DEVELOPER_KEY)
 vid_id_list = []
 vids_in_target_time = []
-line_string = "-" * 80
+line_string = "-" * 80  # default width of template terminal is 80 chars
+DEFAULT_SORT_ORDER = 'views'
+DEFAULT_NUM_OF_RESULTS = 3
+
 # Welcome and Prompt Fucntion Section -------------------------------------------------------------
+
+
 def print_initial_screen():
     print(logo1)
     print("Welcome to the YouTube Channel Sorter")
@@ -62,6 +69,7 @@ Last (Y)ear, Last (S)ix Months, Last (M)onth, Last (W)eek
     selected_timeframe = selected_timeframe.lower()
     if selected_timeframe in ACCEPTED_TIMEFRAMES:
         tf = calculate_past_timeframes(selected_timeframe)
+        print(line_string)
         print("Loading Selected Results")
         print("This can take a minute if the channel has many videos")
         return tf
@@ -73,18 +81,22 @@ Last (Y)ear, Last (S)ix Months, Last (M)onth, Last (W)eek
 def calculate_past_timeframes(input_letter):
     if input_letter == "y":
         one_year_ago = live_now() - relativedelta(years=+1)
+        print('You selected: "Last Year"')
         return one_year_ago
 
     elif input_letter == "s":
         six_months_ago = live_now() - relativedelta(months=+6)
+        print('You selected: "Last Six Months"')
         return six_months_ago
 
     elif input_letter == "m":
         one_month_ago = live_now() - relativedelta(months=+1)
+        print('You selected: "Last Month"')
         return one_month_ago
 
     elif input_letter == "w":
         one_week_ago = live_now() - relativedelta(weeks=+1)
+        print('You selected: "Last Week"')
         return one_week_ago
 
     else:
@@ -102,11 +114,6 @@ def get_total_vids_in_timeframe(vids_in_target_time):
     return result
 
 
-def get_next_page_token(response):
-    next_token = response["nextPageToken"]
-    return next_token
-
-
 def get_oldest_date_in_response(response):
     if type(response) is list:
         last_video_on_page = response[-1]
@@ -117,12 +124,10 @@ def get_oldest_date_in_response(response):
         last_video_on_page = returned_videos[-1]
         oldest_datetime = parser.parse(last_video_on_page["snippet"]["publishedAt"])
         return oldest_datetime
-    
 
 
 def add_response_vids_to_list(response):
     returned_videos = response["items"]
-
     for i in returned_videos:
         full_vid_list.append(i)
 
@@ -130,13 +135,6 @@ def add_response_vids_to_list(response):
 def date_format_to_google_dates(target_date, SAMPLE_RETURN_DATE):
     target_date_tz = target_date.astimezone(SAMPLE_RETURN_DATE.tzinfo)
     return target_date_tz
-
-
-def is_next_page_needed(last_video_date, target_date):
-    if last_video_date > target_date:
-        return True
-    else:
-        return False
 
 
 def grab_ids_in_date(target_date):
@@ -160,9 +158,6 @@ def output_results(results, response, last_date):
     total_vids_in_timeframe = get_total_vids_in_timeframe(vids_in_target_time)
     quota_used = get_credits_used(total_vids_in_timeframe)
 
-    DEFAULT_SORT_ORDER = 'views'
-    DEFAULT_NUM_OF_RESULTS = 3
-
     vids_in_target_time.sort(key=lambda vid: vid[DEFAULT_SORT_ORDER], reverse=True)
 
     output_header_string = make_header_string(
@@ -173,8 +168,8 @@ def output_results(results, response, last_date):
 
     terminal_output_results_string = make_terminal_results_string(
         output_header_string,
-        DEFAULT_NUM_OF_RESULTS,
-        DEFAULT_SORT_ORDER
+        DEFAULT_SORT_ORDER,
+        DEFAULT_NUM_OF_RESULTS
         )
         
     print(terminal_output_results_string)
@@ -186,9 +181,10 @@ def output_results(results, response, last_date):
     # if save_file_prompt.lower() == "y": # TODO pyinput plus?
     #     string_to_txt_file(full_output_string)
 
+
 def make_header_string(total_channel_vids, total_vids_in_timeframe, last_date, quota_used):
     output_header_list = []
-    output_header_list.append(line_string)  # default width of template terminal
+    output_header_list.append(line_string)
     output_header_list.append(f'Channel has {total_channel_vids} total visible videos\n')
     output_header_list.append(f'Channel has {total_vids_in_timeframe} videos in selected timeframe\n')
     output_header_list.append(f'Oldest Video in Selected Timeframe uploaded to channel was posted:')
@@ -199,7 +195,12 @@ def make_header_string(total_channel_vids, total_vids_in_timeframe, last_date, q
     return output_header_string
 
 
-def make_terminal_results_string(output_header_string, num_of_output_results=3, order='views',):
+def make_terminal_results_string(
+    output_header_string,
+    order=DEFAULT_SORT_ORDER,
+    num_of_output_results=DEFAULT_NUM_OF_RESULTS,
+):
+
     terminal_output_part_list = []
 
     settings = (f'Top {num_of_output_results} Results\nSorted by {order}:\n{line_string}')
@@ -357,7 +358,7 @@ def main():
     original_response = r #Save for general channel/playlist metadata parsing
     oldest_response_datetime = get_oldest_date_in_response(r)
     add_response_vids_to_list(r)
-    while is_next_page_needed(oldest_response_datetime, target_date):
+    while oldest_response_datetime > target_date:
         if r["nextPageToken"]:
             token = r["nextPageToken"]
             r = query_playlistitems_api(saved_playlist_id, token)
