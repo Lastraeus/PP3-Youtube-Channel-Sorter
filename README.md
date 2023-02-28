@@ -126,6 +126,8 @@ itemgetter https://stackoverflow.com/questions/72899/how-do-i-sort-a-list-of-dic
 
 get views https://github.com/CoreyMSchafer/code_snippets/blob/master/Python/YouTube-API/03-Most-Popular-Video-Playlist/start.py
 
+handle api errors https://stackoverflow.com/questions/23945784/how-to-manage-google-api-errors-in-python
+
 
 divide list into chunks (for video querys using vidID lists more than 50 items long) https://www.geeksforgeeks.org/break-list-chunks-size-n-python/
 
@@ -135,6 +137,8 @@ textfile https://www.pythontutorial.net/python-basics/python-create-text-file/
 
 make output as one string for writing to file or printing
 https://flexiple.com/python/python-append-to-string/
+
+check type is list not json https://www.geeksforgeeks.org/python-type-function/
 
 ### __Content__
 __Text Content__

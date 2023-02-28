@@ -18,7 +18,7 @@ api_version = "v3"
 f = open("creds.json")
 api_key_data = json.load(f)
 DEVELOPER_KEY = api_key_data["key1"]
-SAMPLE_RETURN_DATE = parser.parse("2022-09-19T18:08:46Z") #used to get correct timezone for comparison
+SAMPLE_RETURN_DATE = parser.parse("2022-09-19T18:08:46Z")  #used to get correct timezone for comparison
 ACCEPTED_TIMEFRAMES = ["y", "s", "m", "w"]
 live_now = datetime.datetime.now  #run as live_now()
 api_response_meta = {}
@@ -109,10 +109,16 @@ def get_next_page_token(response):
 
 
 def get_oldest_date_in_response(response):
-    returned_videos = response["items"]
-    last_video_on_page = returned_videos[-1]
-    oldest_datetime = parser.parse(last_video_on_page["snippet"]["publishedAt"])
-    return oldest_datetime
+    if type(response) is list:
+        last_video_on_page = response[-1]
+        oldest_datetime = parser.parse(last_video_on_page["published"])
+        return oldest_datetime
+    else:
+        returned_videos = response["items"]
+        last_video_on_page = returned_videos[-1]
+        oldest_datetime = parser.parse(last_video_on_page["snippet"]["publishedAt"])
+        return oldest_datetime
+    
 
 
 def add_response_vids_to_list(response):
@@ -120,8 +126,6 @@ def add_response_vids_to_list(response):
 
     for i in returned_videos:
         full_vid_list.append(i)
-
-    save_data_to_json(full_vid_list, "test_vid_list")
 
 
 def date_format_to_google_dates(target_date, SAMPLE_RETURN_DATE):
@@ -165,19 +169,21 @@ def output_results(results, response, last_date):
 
     output_list = []
 
-    print(eighty_hashes)  # default width of template terminal
-    print(f'Channel has {total_channel_vids} total visible videos\n')
-    print(f'Channel has {total_queried_vids} videos in selected timeframe\n')
-    print(f'Oldest Video in Selected Timeframe uploaded to channel was posted:')
-    print(last_date) # TODO update for small lists to vids in target time
-    print(f'Total API Quota Credits used: {quota_used}')
-    print(eighty_hashes)
-    num_of_output_results
-    print()
-    for video in vids_in_target_time[:10]:
-        print(video["title"])
-        print(f'Views: {video["views"]}, Published: {video["published"]}')
-        print(video['url'], "\n")
+    output_list.append(eighty_hashes)  # default width of template terminal
+    output_list.append(f'Channel has {total_channel_vids} total visible videos\n')
+    output_list.append(f'Channel has {total_queried_vids} videos in selected timeframe\n')
+    output_list.append(f'Oldest Video in Selected Timeframe uploaded to channel was posted:')
+    output_list.append(f'{last_date}')
+    output_list.append(f'Total API Quota Credits used: {quota_used}')
+    output_list.append(eighty_hashes)
+    num_of_output_results = 5
+    for video in vids_in_target_time[:num_of_output_results]:
+        output_list.append(video["title"])
+        output_list.append(f'Views: {video["views"]}, Published: {video["published"]}')
+        output_list.append(f'{video["url"]}\n')
+    
+    output_string = "\n".join(output_list)
+    print(output_string)
 
 
 def handle_error_reason(error_reason):
@@ -225,7 +231,7 @@ def query_api(playlist_id):
         playlistId=playlist_id
     )
     
-
+    # https://stackoverflow.com/questions/23945784/how-to-manage-google-api-errors-in-python
     # If the error is a rate limit or connection error,
     # wait and try again.
     # if err.resp.status in [403, 500, 503]:
@@ -350,10 +356,11 @@ def main():
             break
     grab_ids_in_date(target_date)
     query_vids(vid_ids)
+    last_video_date_in_timeframe = get_oldest_date_in_response(vids_in_target_time)
     output_results(
         vids_in_target_time, 
         original_response, 
-        oldest_response_datetime
+        last_video_date_in_timeframe
         )
 
 if __name__ == "__main__":
