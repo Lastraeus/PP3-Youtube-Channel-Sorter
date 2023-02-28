@@ -1,3 +1,4 @@
+import math
 import json 
 import datetime
 import googleapiclient.discovery
@@ -24,7 +25,7 @@ last_page_token = ""
 need_next_page = False
 youtube = googleapiclient.discovery.build(api_service_name, api_version, developerKey = DEVELOPER_KEY)
 vid_ids = []
-vids_to_show = []
+vids_in_target_time = []
 eighty_hashes = "--------------------------------------------------------------------------------"
 
 # Welcome and Prompt Fucntion Section -------------------------------------------------------------
@@ -90,9 +91,14 @@ def calculate_past_timeframes(input_letter):
 
 
 # Response Parsing Section ------------------------------------------------------------------------
-def get_total_vids(response):
+def get_total_channel_vids(response):
     total_channel_videos = response["pageInfo"]["totalResults"]
     return total_channel_videos
+
+
+def get_total_queried_vids(vids_in_target_time):
+    result = len(vids_in_target_time)
+    return result
 
 
 def get_next_page_token(response):
@@ -128,8 +134,8 @@ def is_next_page_needed(last_video_date, target_date):
         return False
 
 
-def sort_and_trim_vid_list(list_of_dicts):
-    newlist = sorted(list_dicts, key=itemgetter('name'), reverse=True)
+# def sort_and_trim_vid_list(list_of_dicts):
+#     newlist = sorted(list_dicts, key=itemgetter('name'), reverse=True)
 
 
 def grab_ids_in_date(target_date):
@@ -139,17 +145,30 @@ def grab_ids_in_date(target_date):
             vid_ids.append(item['contentDetails']['videoId'])
 
 
+def get_credits_used(total_videos):
+    """takes a int of total videos returned from query
+    returns the amount of api quota credits it took to get"""
+    x = total_videos
+    quota_credits_used = math.ceil((x / 50)) * 2
+    return quota_credits_used
+
+
 # Output Results After Searching/Parsing Section --------------------------------------------------------------
 def output_results(results, response, last_date):
-    total_channel_vids = get_total_vids(response)
-    vids_to_show.sort(key=lambda vid: vid['views'], reverse=True)
+    total_channel_vids = get_total_channel_vids(response)
+    total_queried_vids = get_total_queried_vids(vids_in_target_time)
+    quota_used = get_credits_used(total_queried_vids)
+
+    vids_in_target_time.sort(key=lambda vid: vid['views'], reverse=True)
+
     print(eighty_hashes)  # default width of template terminal
     print(f'Channel has {total_channel_vids} total visible videos\n')
-    print(f'Channel has {len(vids_to_show)} videos in selected timeframe\n')
+    print(f'Channel has {total_queried_vids} videos in selected timeframe\n')
     print(f'Oldest Video in Selected Timeframe uploaded to channel was posted:')
     print(last_date)
+    print(f'Total API Quota Credits used: {quota_used}')
     print(eighty_hashes)
-    for video in vids_to_show[:10]:
+    for video in vids_in_target_time[:10]:
         print(video["title"])
         print(f'Views: {video["views"]}, Published: {video["published"]}')
         print(video['url'], "\n")
@@ -236,7 +255,7 @@ def query_vids(vid_ids):
                 title = item["snippet"]["title"]
                 yt_link = f'https://youtu.be/{vid_id}'
 
-                vids_to_show.append(
+                vids_in_target_time.append(
                     {
                         'views': int(vid_views),
                         'title': title,
@@ -273,7 +292,7 @@ def split_vid_list_query(list_of_ids_lists):
                 published = item["snippet"]["publishedAt"]
                 yt_link = f'https://youtu.be/{vid_id}'
 
-                vids_to_show.append(
+                vids_in_target_time.append(
                     {
                         'views': int(vid_views),
                         'title': title,
@@ -315,7 +334,7 @@ def main():
             break
     grab_ids_in_date(target_date)
     query_vids(vid_ids)
-    output_results(vids_to_show, original_response, oldest_response_datetime)
+    output_results(vids_in_target_time, original_response, oldest_response_datetime)
 
 if __name__ == "__main__":
     main()
