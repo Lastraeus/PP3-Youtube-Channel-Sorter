@@ -1,4 +1,4 @@
-from os.path import exists
+import os
 import json
 
 
@@ -10,10 +10,13 @@ def leading_zeros_filenum(num):
 
 
 def save_data_to_json(data):
+    isExist = os.path.exists("/outputs/json")
+    if not isExist:
+        os.makedirs("/outputs/json")
     filenum = 1
     filenum_string = leading_zeros_filenum(filenum)
     filepath = (f'outputs/json/output{filenum_string}.json')
-    while exists(filepath):
+    while os.path.exists(filepath):
         filenum = filenum + 1
         filenum_string = leading_zeros_filenum(filenum)
         filepath = (f'outputs/json/output{filenum_string}.json')
@@ -25,10 +28,13 @@ def save_data_to_json(data):
 
 
 def string_to_txt_file(string):
+    isExist = os.path.exists("outputs/txt")
+    if not isExist:
+        os.makedirs("outputs/txt")
     filenum = 1
     filenum_string = leading_zeros_filenum(filenum)
     filepath = (f'outputs/txt/output{filenum_string}.txt')
-    while exists(filepath):
+    while os.path.exists(filepath):
         filenum = filenum + 1
         filenum_string = leading_zeros_filenum(filenum)
         filepath = (f'outputs/txt/output{filenum_string}.txt')
