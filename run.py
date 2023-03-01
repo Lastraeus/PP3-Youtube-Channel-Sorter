@@ -248,9 +248,14 @@ def handle_error_reason(error_reason):
 
 
 # Utility Function Section ------------------------------------------------------------------------
-def save_data_to_json(data, filename):
-    jsonString = json.dumps(full_vid_list)
-    jsonFile = open(f'{filename}.json', "w")
+def save_data_to_json(data):
+    filenum = 1
+    filepath = (f'test/test_output{filenum}.json')
+    while exists(filepath):
+        filenum = filenum + 1
+        filepath = (f'test/test_output{filenum}.json')
+    jsonString = json.dumps(data)
+    jsonFile = open(filepath, "w")
     jsonFile.write(jsonString)
     jsonFile.close()
 
@@ -352,8 +357,7 @@ def main():
             target_date = timeframe_prompt()
         target_date = date_format_to_google_dates(target_date, SAMPLE_RETURN_DATE)
         r = query_playlistitems_api(channel_playlist_id)
-    # save_data_to_json(r, "latest_response_test")
-    original_response = r #Save for general channel/playlist metadata parsing
+    original_response = r  # Save for general channel/playlist metadata parsing
     oldest_response_datetime = get_oldest_date_in_response(r)
     add_response_vids_to_list(r)
     while oldest_response_datetime > target_date:
@@ -362,7 +366,6 @@ def main():
             r = query_playlistitems_api(saved_playlist_id, token)
             oldest_response_datetime = get_oldest_date_in_response(r)
             add_response_vids_to_list(r)
-            # save_data_to_json(r, "latest_response_test")
         else:
             break
     grab_ids_in_date(target_date)
@@ -377,9 +380,3 @@ def main():
 if __name__ == "__main__":
     main()
 
-# Channels on hand to test app with ---------------------------------------------------------------
-# test_channel1 = "https://www.youtube.com/@kaptainkristian"
-# test_channel2 = "https://www.youtube.com/@quill18"
-# test_channel4 = "https://www.youtube.com/user/billwurtz"
-# test_channel4 = "https://www.youtube.com/@billwurtzwrongname" # Invalid case
-# test_channel5 = "https://www.youtube.com/@scottmanley/videos"
