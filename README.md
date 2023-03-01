@@ -142,6 +142,10 @@ check type is list not json https://www.geeksforgeeks.org/python-type-function/
 
 leading zeros for output https://www.delftstack.com/howto/python/python-leading-zeros/
 
+pydrive2 for permission sharing https://docs.iterative.ai/PyDrive2/filemanagement/#insert-permissions
+
+use service account https://github.com/iterative/PyDrive2/issues/21
+
 ### __Content__
 __Text Content__
 

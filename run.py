@@ -3,7 +3,7 @@ import json
 import datetime
 import googleapiclient.discovery
 import pytube
-import saveresults
+import gspread
 """specifically https://github.com/felipeucelli/pytube.git
 for modern channelurl parsing"""
 from os.path import exists
@@ -11,6 +11,9 @@ from googleapiclient.errors import HttpError
 from dateutil.relativedelta import relativedelta
 from dateutil import parser
 from ascii import logo1
+from pydrive2.auth import GoogleAuth
+from pydrive2.drive import GoogleDrive
+from oauth2client.service_account import Credentials, ServiceAccountCredentials
 
 
 # INITIAL VARIABLES -------------------------------------------------------------------------------
@@ -255,7 +258,49 @@ def divide_chunks(l, n):
         yield l[i:i + n]
 
 
-# Query API Functions Section ---------------------------------------------------------------------
+# Sheets/Gspread API Section ----------------------------------------------------------------------
+def load_main_sheet():
+    SCOPE = [
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/drive.file",
+        "https://www.googleapis.com/auth/drive"
+        ]
+
+    CREDS = Credentials.from_service_account_file('drive_creds.json')
+    SCOPED_CREDS = CREDS.with_scopes(SCOPE)
+    GSPREAD_CLIENT = gspread.authorize(SCOPED_CREDS)
+    SHEET = GSPREAD_CLIENT.open('youtube_channel_sorter')
+
+    main_sheet = SHEET.worksheet('main')
+
+    data = main_sheet.get_all_values()
+
+    return data
+
+
+# Drive/Pydrive2 API Section ----------------------------------------------------------------------
+def load_drive():
+    scope = ["https://www.googleapis.com/auth/drive"]
+    gauth = GoogleAuth()
+    gauth.auth_method = 'service'
+    gauth.credentials = ServiceAccountCredentials.from_json_keyfile_name('drive_creds.json', scope)
+    drive = GoogleDrive(gauth)
+
+    about = drive.GetAbout()
+    return about
+
+    # print('Current user name:{}'.format(about['name']))
+    # print('Root folder ID:{}'.format(about['rootFolderId']))
+    # print('Total quota (bytes):{}'.format(about['quotaBytesTotal']))
+    # print('Used quota (bytes):{}'.format(about['quotaBytesUsed']))
+
+
+    # file_list = drive.ListFile().GetList()
+    # for file1 in file_list:
+    #     print('title: %s, id: %s' % (file1['title'], file1['id']))
+
+
+# YouTube Query API Functions Section -------------------------------------------------------------
 def query_playlistitems_api(playlist_id, token=None):
     play_list_request = youtube.playlistItems().list(        
         part="snippet,contentDetails",
