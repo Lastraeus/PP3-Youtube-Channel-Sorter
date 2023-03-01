@@ -2,7 +2,8 @@ import math
 import json 
 import datetime
 import googleapiclient.discovery
-import pytube 
+import pytube
+import saveresults
 """specifically https://github.com/felipeucelli/pytube.git
 for modern channelurl parsing"""
 from os.path import exists
@@ -248,28 +249,6 @@ def handle_error_reason(error_reason):
 
 
 # Utility Function Section ------------------------------------------------------------------------
-def save_data_to_json(data):
-    filenum = 1
-    filepath = (f'test/test_output{filenum}.json')
-    while exists(filepath):
-        filenum = filenum + 1
-        filepath = (f'test/test_output{filenum}.json')
-    jsonString = json.dumps(data)
-    jsonFile = open(filepath, "w")
-    jsonFile.write(jsonString)
-    jsonFile.close()
-
-
-def string_to_txt_file(string):
-    filenum = 1
-    filepath = (f'test/test_output{filenum}.txt')
-    while exists(filepath):
-        filenum = filenum + 1
-        filepath = (f'test/test_output{filenum}.txt')
-    with open(filepath, 'w') as f:
-        f.write(string)
-
-
 def divide_chunks(l, n):
     # looping till length l
     for i in range(0, len(l), n):

@@ -140,6 +140,8 @@ https://flexiple.com/python/python-append-to-string/
 
 check type is list not json https://www.geeksforgeeks.org/python-type-function/
 
+leading zeros for output https://www.delftstack.com/howto/python/python-leading-zeros/
+
 ### __Content__
 __Text Content__
 
