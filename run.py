@@ -60,7 +60,6 @@ def channel_prompt():
         return channel_all_vid_playlist_id
     except:
         print("That is not a valid YouTube Channel URL")
-        channel_prompt()
 
 
 def timeframe_prompt():
