@@ -8,7 +8,6 @@ import pyinputplus as pyip
 import saveresults
 """specifically https://github.com/felipeucelli/pytube.git
 for modern channelurl parsing"""
-from os.path import exists
 from os import remove
 from googleapiclient.errors import HttpError
 from dateutil.relativedelta import relativedelta

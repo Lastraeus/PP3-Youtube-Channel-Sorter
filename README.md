@@ -146,6 +146,12 @@ pydrive2 for permission sharing https://docs.iterative.ai/PyDrive2/filemanagemen
 
 use service account https://github.com/iterative/PyDrive2/issues/21
 
+pyinputplus https://pypi.org/project/PyInputPlus/
+
+upload to drive from https://harshmaur.com/how-to-use-pydrive2-to-upload-a-file-to-google-drive-folder
+
+https://stackoverflow.com/questions/46562255/python-upload-my-own-files-into-my-drive-using-pydrive-library
+
 ### __Content__
 __Text Content__
 
