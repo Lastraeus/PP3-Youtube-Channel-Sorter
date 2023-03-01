@@ -4,9 +4,12 @@ import datetime
 import googleapiclient.discovery
 import pytube
 import gspread
+import pyinputplus as pyip
+import saveresults
 """specifically https://github.com/felipeucelli/pytube.git
 for modern channelurl parsing"""
 from os.path import exists
+from os import remove
 from googleapiclient.errors import HttpError
 from dateutil.relativedelta import relativedelta
 from dateutil import parser
@@ -20,7 +23,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 # INITIAL VARIABLES -------------------------------------------------------------------------------
 api_service_name = "youtube"
 api_version = "v3"
-f = open("creds.json")
+f = open("yt_creds.json")
 api_key_data = json.load(f)
 DEVELOPER_KEY = api_key_data["key1"]
 SAMPLE_RETURN_DATE = parser.parse("2022-09-19T18:08:46Z")  # used to get correct timezone for comparison
@@ -176,13 +179,17 @@ def output_results(results, response, last_date):
         )
         
     print(terminal_output_results_string)
-    
-    # TODO Awaiting Google Drive integration
-    # # full_output_string = make_full_results_string(output_header_string)
-    # print('Would you like to save the full list of results to a text file?')
-    # save_file_prompt = input('Enter (Y)es if so\n')
-    # if save_file_prompt.lower() == "y": # TODO pyinput plus?
-    #     string_to_txt_file(full_output_string)
+    print(line_string)
+    print('Would you like to save the full list of results to a text file?')
+    yesno = pyip.inputYesNo(default="no")
+    if yesno == "yes":
+        full_output_string = make_full_results_string(output_header_string)
+        newfile = saveresults.string_to_txt_file(full_output_string)
+        try:
+            upload_file_to_gdrive(newfile, "txt")
+            remove(newfile) 
+        except Exception as e:
+            print(e)
 
 
 def make_header_string(total_channel_vids, total_vids_in_timeframe, last_date, quota_used):
@@ -278,6 +285,8 @@ def load_main_sheet():
 
     return data
 
+# TODO def check_quota():
+
 
 # Drive/Pydrive2 API Section ----------------------------------------------------------------------
 def load_drive():
@@ -299,6 +308,31 @@ def load_drive():
     # file_list = drive.ListFile().GetList()
     # for file1 in file_list:
     #     print('title: %s, id: %s' % (file1['title'], file1['id']))
+
+
+def upload_file_to_gdrive(file_path, folder_name):
+    """Take the filepath of the new file, upload it to drive
+    make it sharable and provide the link"""
+    scope = ["https://www.googleapis.com/auth/drive"]
+    gauth = GoogleAuth()
+    gauth.auth_method = 'service'
+    gauth.credentials = ServiceAccountCredentials.from_json_keyfile_name('drive_creds.json', scope)
+    drive = GoogleDrive(gauth)
+
+    if folder_name == "txt":
+        folder_id = '1OzCotUCYfZEhczTSBD-WnwA_TJbyPiNZ'  # txt folder
+
+    file1 = drive.CreateFile(
+        {'parents': [{"id": folder_id}]})
+    file1.SetContentFile(file_path)
+    file1.Upload()
+    file1.InsertPermission({
+        'type': 'anyone',
+        'value': 'anyone',
+        'role': 'reader'})
+    print(file1['alternateLink'])
+
+
 
 
 # YouTube Query API Functions Section -------------------------------------------------------------

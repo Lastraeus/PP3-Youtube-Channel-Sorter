@@ -12,27 +12,29 @@ def leading_zeros_filenum(num):
 def save_data_to_json(data):
     filenum = 1
     filenum_string = leading_zeros_filenum(filenum)
-    filepath = (f'test/json/test_output{filenum_string}.json')
+    filepath = (f'outputs/json/output{filenum_string}.json')
     while exists(filepath):
         filenum = filenum + 1
         filenum_string = leading_zeros_filenum(filenum)
-        filepath = (f'test/json/test_output{filenum_string}.json')
+        filepath = (f'outputs/json/output{filenum_string}.json')
     jsonString = json.dumps(data)
     jsonFile = open(filepath, "w")
     jsonFile.write(jsonString)
     jsonFile.close()
+    return filepath
 
 
 def string_to_txt_file(string):
     filenum = 1
     filenum_string = leading_zeros_filenum(filenum)
-    filepath = (f'test/txt/test_output{filenum_string}.txt')
+    filepath = (f'outputs/txt/output{filenum_string}.txt')
     while exists(filepath):
         filenum = filenum + 1
         filenum_string = leading_zeros_filenum(filenum)
-        filepath = (f'test/txt/test_output{filenum_string}.txt')
+        filepath = (f'outputs/txt/output{filenum_string}.txt')
     with open(filepath, 'w') as f:
         f.write(string)
+    return filepath
 
 
 # test_string1 = """Hello, world!
