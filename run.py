@@ -13,7 +13,8 @@ from dateutil import parser
 from ascii import logo1
 from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
-from oauth2client.service_account import Credentials, ServiceAccountCredentials
+from google.oauth2.service_account import Credentials
+from oauth2client.service_account import ServiceAccountCredentials
 
 
 # INITIAL VARIABLES -------------------------------------------------------------------------------
