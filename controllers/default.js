@@ -51,7 +51,7 @@ function socket() {
 
 if (process.env.YTCREDS != null) {
     console.log("Creating yt_creds.json file.");
-    fs.writeFile('yt_creds.json', process.env.CREDS, 'utf8', function (err) {
+    fs.writeFile('yt_creds.json', process.env.YTCREDS, 'utf8', function (err) {
         if (err) {
             console.log('Error writing file: ', err);
             socket.emit("console_output", "Error saving YouTube credentials: " + err);
@@ -61,7 +61,7 @@ if (process.env.YTCREDS != null) {
 
 if (process.env.DRIVECREDS != null) {
     console.log("Creating drive_creds.json file.");
-    fs.writeFile('drive_creds.json', process.env.CREDS2, 'utf8', function (err) {
+    fs.writeFile('drive_creds.json', process.env.DRIVECREDS, 'utf8', function (err) {
         if (err) {
             console.log('Error writing file: ', err);
             socket.emit("console_output", "Error saving Google Drive credentials: " + err);
