@@ -3,9 +3,9 @@ import json
 import datetime
 import googleapiclient.discovery
 import pytube
-import gspread
 import pyinputplus as pyip
 import saveresults
+import gspread
 """specifically https://github.com/felipeucelli/pytube.git
 for modern channelurl parsing"""
 from os import remove
@@ -13,10 +13,7 @@ from googleapiclient.errors import HttpError
 from dateutil.relativedelta import relativedelta
 from dateutil import parser
 from ascii import logo1
-from pydrive2.auth import GoogleAuth
-from pydrive2.drive import GoogleDrive
 from google.oauth2.service_account import Credentials
-from oauth2client.service_account import ServiceAccountCredentials
 
 
 # INITIAL VARIABLES -------------------------------------------------------------------------------
@@ -38,6 +35,7 @@ vids_in_target_time = []
 line_string = "-" * 80  # default width of template terminal is 80 chars
 DEFAULT_SORT_ORDER = 'views'
 DEFAULT_NUM_OF_RESULTS = 3
+saved_playlist_id = ""
 
 # Welcome and Prompt Fucntion Section -------------------------------------------------------------
 
@@ -105,6 +103,9 @@ def calculate_past_timeframes(input_letter):
 
     else:
         print("Unknown Timeframe passed")
+
+
+
 
 
 # Response Parsing Section ------------------------------------------------------------------------
@@ -179,12 +180,13 @@ def output_results(results, response, last_date):
     print(terminal_output_results_string)
     print(line_string)
     print('Would you like to save the full list of results to a text file?')
+    print('Enter y/n')
     yesno = pyip.inputYesNo(default="no")
     if yesno == "yes":
         full_output_string = make_full_results_string(output_header_string)
         newfile = saveresults.string_to_txt_file(full_output_string)
         try:
-            upload_file_to_gdrive(newfile, "txt")
+            saveresults.upload_file_to_gdrive(newfile, "txt")
             remove(newfile) 
         except Exception as e:
             print(e)
@@ -256,6 +258,13 @@ def handle_error_reason(error_reason):
         else:
             print("Issue with API Quota Limit. Maybe Try Again Tomorrow.")
 
+def ask_restart():
+    print('Would you like to run another search? y/n')
+    yesno = pyip.inputYesNo(default="no")
+    if yesno == "no":
+        print("Goodbye!")
+        exit()
+
 
 # Utility Function Section ------------------------------------------------------------------------
 def divide_chunks(l, n):
@@ -306,33 +315,6 @@ def load_drive():
     # file_list = drive.ListFile().GetList()
     # for file1 in file_list:
     #     print('title: %s, id: %s' % (file1['title'], file1['id']))
-
-
-def upload_file_to_gdrive(file_path, folder_name):
-    """Take the filepath of the new file, upload it to drive
-    make it sharable and provide the link"""
-    scope = ["https://www.googleapis.com/auth/drive"]
-    gauth = GoogleAuth()
-    gauth.auth_method = 'service'
-    gauth.credentials = ServiceAccountCredentials.from_json_keyfile_name('drive_creds.json', scope)
-    drive = GoogleDrive(gauth)
-
-    if folder_name == "txt":
-        folder_id = '1OzCotUCYfZEhczTSBD-WnwA_TJbyPiNZ'  # txt folder
-
-    file1 = drive.CreateFile(
-        {'parents': [{"id": folder_id}]})
-    file1.SetContentFile(file_path)
-    file1.Upload()
-    file1.InsertPermission({
-        'type': 'anyone',
-        'value': 'anyone',
-        'role': 'reader'})
-    print('Your result is saved at the link below.')
-    print('Select it with mouse and right click --> copy')
-    print(file1['alternateLink'])
-
-
 
 
 # YouTube Query API Functions Section -------------------------------------------------------------
@@ -406,35 +388,38 @@ def split_vid_list_query(list_of_vid_id_lists):
 
 # Main() Section ----------------------------------------------------------------------------------
 def main():
-    print_initial_screen()
-    r = None
-    while r == None:
-        channel_playlist_id = channel_prompt()
-        saved_playlist_id = channel_playlist_id
-        target_date = None
-        while target_date == None:
-            target_date = timeframe_prompt()
-        target_date = date_format_to_google_dates(target_date, SAMPLE_RETURN_DATE)
-        r = query_playlistitems_api(channel_playlist_id)
-    original_response = r  # Save for general channel/playlist metadata parsing
-    oldest_response_datetime = get_oldest_date_in_response(r)
-    add_response_vids_to_list(r)
-    while oldest_response_datetime > target_date:
-        if r["nextPageToken"]:
-            token = r["nextPageToken"]
-            r = query_playlistitems_api(saved_playlist_id, token)
-            oldest_response_datetime = get_oldest_date_in_response(r)
-            add_response_vids_to_list(r)
-        else:
-            break
-    grab_ids_in_date(target_date)
-    query_vids(vid_id_list)
-    last_video_date_in_timeframe = get_oldest_date_in_response(vids_in_target_time)
-    output_results(
-        vids_in_target_time, 
-        original_response, 
-        last_video_date_in_timeframe
-        )
+    while True:
+        print_initial_screen()
+        r = None
+        while r == None:
+            channel_playlist_id = channel_prompt()
+            saved_playlist_id = channel_playlist_id
+            target_date = None
+            while target_date == None:
+                target_date = timeframe_prompt()
+            target_date = date_format_to_google_dates(target_date, SAMPLE_RETURN_DATE)
+            r = query_playlistitems_api(channel_playlist_id)
+        original_response = r  # Save for general channel/playlist metadata parsing
+        oldest_response_datetime = get_oldest_date_in_response(r)
+        add_response_vids_to_list(r)
+        while oldest_response_datetime > target_date:
+            if r["nextPageToken"]:
+                token = r["nextPageToken"]
+                r = query_playlistitems_api(saved_playlist_id, token)
+                oldest_response_datetime = get_oldest_date_in_response(r)
+                add_response_vids_to_list(r)
+            else:
+                break
+        grab_ids_in_date(target_date)
+        query_vids(vid_id_list)
+        last_video_date_in_timeframe = get_oldest_date_in_response(vids_in_target_time)
+        output_results(
+            vids_in_target_time, 
+            original_response, 
+            last_video_date_in_timeframe
+            )
+        ask_restart()
+
 
 if __name__ == "__main__":
     main()

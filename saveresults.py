@@ -1,5 +1,8 @@
 import os
 import json
+from pydrive2.auth import GoogleAuth
+from pydrive2.drive import GoogleDrive
+from oauth2client.service_account import ServiceAccountCredentials
 
 
 def leading_zeros_filenum(num):
@@ -42,13 +45,26 @@ def string_to_txt_file(string):
         f.write(string)
     return filepath
 
+def upload_file_to_gdrive(file_path, folder_name):
+    """Take the filepath of the new file, upload it to drive
+    make it sharable and provide the link"""
+    scope = ["https://www.googleapis.com/auth/drive"]
+    gauth = GoogleAuth()
+    gauth.auth_method = 'service'
+    gauth.credentials = ServiceAccountCredentials.from_json_keyfile_name('drive_creds.json', scope)
+    drive = GoogleDrive(gauth)
 
-# test_string1 = """Hello, world!
-# This is a test.
-# thank you!"""
-# test_string2 = """Another Test"""
-# test_string3 = """A Third Test"""
+    if folder_name == "txt":
+        folder_id = '1OzCotUCYfZEhczTSBD-WnwA_TJbyPiNZ'  # txt folder
 
-# string_to_txt_file(test_string1)
-# string_to_txt_file(test_string2)
-# string_to_txt_file(test_string3)
+    file1 = drive.CreateFile(
+        {'parents': [{"id": folder_id}]})
+    file1.SetContentFile(file_path)
+    file1.Upload()
+    file1.InsertPermission({
+        'type': 'anyone',
+        'value': 'anyone',
+        'role': 'reader'})
+    print('Your result is saved at the link below.')
+    print(f'Select it with mouse and right click --> copy \n')
+    print(file1['alternateLink'])
