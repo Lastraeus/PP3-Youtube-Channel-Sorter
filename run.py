@@ -328,6 +328,8 @@ def upload_file_to_gdrive(file_path, folder_name):
         'type': 'anyone',
         'value': 'anyone',
         'role': 'reader'})
+    print('Your result is saved at the link below.')
+    print('Select it with mouse and right click --> copy')
     print(file1['alternateLink'])
 
 
