@@ -7,22 +7,24 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 def leading_zeros_filenum(num):
     """Takes a int and returns a string with 5 leading zeros.
-    For use as as a file number"""
+    For use as a file number"""
     result = f'{num:05d}'
     return result
 
 
 def save_data_to_json(data):
-    isExist = os.path.exists("/outputs/json")
+    """takes a json compatitble object and saves it as a json to the
+    outputs/json folder returns the filepath to it."""
+    isExist = os.path.exists("/outputs")
     if not isExist:
-        os.makedirs("/outputs/json")
+        os.makedirs("/outputs")
     filenum = 1
     filenum_string = leading_zeros_filenum(filenum)
-    filepath = (f'outputs/json/output{filenum_string}.json')
+    filepath = (f'outputs/output{filenum_string}.json')
     while os.path.exists(filepath):
         filenum = filenum + 1
         filenum_string = leading_zeros_filenum(filenum)
-        filepath = (f'outputs/json/output{filenum_string}.json')
+        filepath = (f'outputs/output{filenum_string}.json')
     jsonString = json.dumps(data)
     jsonFile = open(filepath, "w")
     jsonFile.write(jsonString)
@@ -31,27 +33,34 @@ def save_data_to_json(data):
 
 
 def string_to_txt_file(string):
-    isExist = os.path.exists("outputs/txt")
+    """takes string and saves it as a txt file to the outputs/txt folder
+    returns the filepath to it."""
+    isExist = os.path.exists("outputs/")
     if not isExist:
-        os.makedirs("outputs/txt")
+        os.makedirs("outputs")
     filenum = 1
     filenum_string = leading_zeros_filenum(filenum)
-    filepath = (f'outputs/txt/output{filenum_string}.txt')
+    filepath = (f'outputs/output{filenum_string}.txt')
     while os.path.exists(filepath):
         filenum = filenum + 1
         filenum_string = leading_zeros_filenum(filenum)
-        filepath = (f'outputs/txt/output{filenum_string}.txt')
+        filepath = (f'outputs/output{filenum_string}.txt')
     with open(filepath, 'w') as f:
         f.write(string)
     return filepath
 
+
 def upload_file_to_gdrive(file_path, folder_name):
-    """Take the filepath of the new file, upload it to drive
-    make it sharable and provide the link"""
+    """Take the filepath of the new file and target folder of the gdrive,
+    creates a instance pydrive2 instance then uploads it to drive.
+    Sets permissions for the file to sharable and provides the link"""
     scope = ["https://www.googleapis.com/auth/drive"]
     gauth = GoogleAuth()
     gauth.auth_method = 'service'
-    gauth.credentials = ServiceAccountCredentials.from_json_keyfile_name('drive_creds.json', scope)
+    gauth.credentials = ServiceAccountCredentials.from_json_keyfile_name(
+        'drive_creds.json',
+        scope
+        )
     drive = GoogleDrive(gauth)
 
     if folder_name == "txt":
@@ -66,5 +75,5 @@ def upload_file_to_gdrive(file_path, folder_name):
         'value': 'anyone',
         'role': 'reader'})
     print('Your result is saved at the link below.')
-    print(f'Select it with mouse and right click --> copy \n')
+    print('Select it with mouse and right click --> copy \n')
     print(file1['alternateLink'])

@@ -148,9 +148,11 @@ use service account https://github.com/iterative/PyDrive2/issues/21
 
 pyinputplus https://pypi.org/project/PyInputPlus/
 
-upload to drive from https://harshmaur.com/how-to-use-pydrive2-to-upload-a-file-to-google-drive-folder
+upload to drive from existing file https://harshmaur.com/how-to-use-pydrive2-to-upload-a-file-to-google-drive-folder
 
-https://stackoverflow.com/questions/46562255/python-upload-my-own-files-into-my-drive-using-pydrive-library
+refference for basic pydrive2 use https://stackoverflow.com/questions/46562255/python-upload-my-own-files-into-my-drive-using-pydrive-library
+
+RE linter warning about missing dynamically created attribute on google service api call https://stackoverflow.com/questions/35990313/avoid-pylint-warning-e1101-instance-of-has-no-member-for-class-with-dyn/54156144#54156144
 
 ### __Content__
 __Text Content__

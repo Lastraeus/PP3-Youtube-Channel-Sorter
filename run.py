@@ -54,7 +54,7 @@ def print_initial_screen():
 def channel_prompt():
     """Asks for a channel url to sort, then uses pytube
     to validate any possible valid YouTube URL
-    Returns the channel ID if found with pytube
+    Returns the playlist ID of the channel if found with pytube.
     if the search failed it lets the user know to try again"""
     inputted_url = input("Please input a valid channel URL \n")
 
@@ -63,8 +63,10 @@ def channel_prompt():
         channel_id = channel.channel_id
         print("Channel Found")
         channel_all_vid_playlist_id = channel_id[:1] + "U" + channel_id[1 + 1:]
+        # channel "all videos" playlist id is same as channel id but
+        # with the second char changed to "U" instead of "C"
         return channel_all_vid_playlist_id
-    except Exception():
+    except Exception:
         print("That is not a valid YouTube Channel URL")
 
 
@@ -120,17 +122,19 @@ def calculate_past_timeframes(input_letter):
 
 
 def get_total_channel_vids(response):
-    """searches the api response json for the total video count on the channel"""
+    """searches the api response json for the total
+    video count on the channel"""
     total_channel_videos = response["pageInfo"]["totalResults"]
     return total_channel_videos
 
 
 def get_oldest_date_in_response(response):
-    """searches the api response json for the odlest video published date in the list of items.
-    can check the last item in any batch response list, 
+    """searches the api response json for the oldest video
+    published date in the list of items.
+    can check the last item in any batch response list,
     as well as the last video in the trimmed results within timeframe"""
 
-    if type(response) is list:
+    if isinstance(response, list):
         last_video_on_page = response[-1]
         oldest_datetime = parser.parse(last_video_on_page["published"])
         return oldest_datetime
@@ -172,8 +176,7 @@ def grab_ids_in_date(target_date):
 def get_credits_used(total_videos):
     """takes a int of total videos returned from query
     returns the amount of api quota credits it took to get"""
-    x = total_videos
-    quota_credits_used = math.ceil((x / 50)) * 2
+    quota_credits_used = math.ceil((total_videos / 50)) * 2
     return quota_credits_used
 
 
@@ -212,8 +215,8 @@ def output_results(results, response, last_date):
         try:
             saveresults.upload_file_to_gdrive(newfile, "txt")
             remove(newfile)
-        except Exception as e:
-            print(e)
+        except Exception as err:
+            print(err)
 
 
 def make_header_string(
@@ -247,8 +250,8 @@ def make_terminal_results_string(
     order=DEFAULT_SORT_ORDER,
     total_output_results=DEFAULT_NUM_OF_RESULTS,
 ):
-    """Takes the defaults and strings needed to format results for the terminal and then
-    combines them and returns it"""
+    """Takes the defaults and strings needed to format results
+    for the terminal and then combines them and returns it"""
 
     terminal_output_part_list = []
 
@@ -274,8 +277,8 @@ def make_terminal_results_string(
 
 
 def make_full_results_string(output_header_string):
-    """Takes the defaults and strings needed to format results for the full list of results and then
-    combines them and returns it"""
+    """Takes the defaults and strings needed to format results for the full
+    list of results and then combines them and returns it"""
     output_results_list = []
 
     for video in vids_in_target_time:
@@ -320,16 +323,17 @@ def ask_restart():
 
 
 # Utility Function Section --------------------------------------------------
-def divide_chunks(list_to_divide, max):
+def divide_chunks(list_to_divide, max_chunk_size):
     """Divides a list of items into a list of smaller lists of size max
     used to divide id_lists that are too long for googles multi_video list
     api query"""
-    for i in range(0, len(list_to_divide), max):
+    for i in range(0, len(list_to_divide), max_chunk_size):
         yield list_to_divide[i:i + max]
 
 
 # YouTube Query API Functions Section ----------------------------------------
 def query_playlistitems_api(playlist_id, token=None):
+    """takes a playlist ID from prompt and returns the json response 'r'"""
     play_list_request = youtube.playlistItems().list(
         part="snippet,contentDetails",
         maxResults=50,
@@ -337,16 +341,9 @@ def query_playlistitems_api(playlist_id, token=None):
         pageToken=token
     )
 
-    # https://stackoverflow.com/questions/23945784/how-to
-    # -manage-google-api-errors-in-python
-    # If the error is a rate limit or connection error,
-    # wait and try again.
-    # if err.resp.status in [403, 500, 503]:
-    #     time.sleep(5)
-    # else: raise
     try:
-        r = play_list_request.execute()
-        return r
+        resp = play_list_request.execute()
+        return resp
     except HttpError as err:
         if err.resp.get('content-type', '').startswith('application/json'):
             reason = json.loads(err.content).get('error').get('errors')[0].get(
@@ -357,7 +354,9 @@ def query_playlistitems_api(playlist_id, token=None):
 
 
 def query_vids(id_list):
-    nextPageToken = None
+    """takes a list of video ids and then returns details about them.
+    All items are appended to vids_in_target_time dict"""
+    next_page_token = None
     if len(id_list) <= 50:
         while True:
             vid_request = youtube.videos().list(
@@ -370,6 +369,8 @@ def query_vids(id_list):
 
             for item in vid_response['items']:
                 vid_views = item['statistics']['viewCount']
+                vid_likes = item['statistics']['likeCount']
+                vid_comments = item['statistics']['commentCount']
                 published = item["snippet"]["publishedAt"]
                 vid_id = item['id']
                 title = item["snippet"]["title"]
@@ -377,16 +378,18 @@ def query_vids(id_list):
 
                 vids_in_target_time.append(
                     {
-                        'views': int(vid_views),
                         'title': title,
+                        'likeCount': vid_likes,
+                        'commentCount': vid_comments,
+                        'views': int(vid_views),
                         'url': yt_link,
                         "published": published
                     }
                 )
 
-            nextPageToken = vid_response.get('nextPageToken')
+            next_page_token = vid_response.get('nextPageToken')
 
-            if not nextPageToken:
+            if not next_page_token:
                 break
     else:
         list_of_vid_id_lists = list(divide_chunks(id_list, 50))
@@ -395,17 +398,21 @@ def query_vids(id_list):
 
 def split_vid_list_query(list_of_vid_id_lists):
     """Feeds a block of 50 video ids to api to query,
-    due to max of 50 ids submitted per query"""
-    for vid_id_list in list_of_vid_id_lists:
-        query_vids(vid_id_list)
+    due to max of 50 ids submitted per query
+    all of which end up appended to the one result dictionary"""
+    for id_list in list_of_vid_id_lists:
+        query_vids(id_list)
 
 
 # Main() Section -------------------------------------------------------------
 def main():
+    """Allows the user to input a channel id, and then view the results
+    before saving them (as a google drive download link) and exiting
+    Can optionally do another search instead of exiting"""
     while True:
         print_initial_screen()
-        r = None
-        while r is None:
+        resp = None
+        while resp is None:
             channel_playlist_id = channel_prompt()
             saved_playlist_id = channel_playlist_id
             target_date = None
@@ -414,16 +421,16 @@ def main():
             target_date = date_format_to_google_dates(
                 target_date,
                 SAMPLE_RETURN_DATE)
-            r = query_playlistitems_api(channel_playlist_id)
-        original_response = r  # Save for general channel/playlist metadata
-        oldest_response_datetime = get_oldest_date_in_response(r)
-        add_response_vids_to_list(r)
+            resp = query_playlistitems_api(channel_playlist_id)
+        original_response = resp  # Save for general channel/playlist metadata
+        oldest_response_datetime = get_oldest_date_in_response(resp)
+        add_response_vids_to_list(resp)
         while oldest_response_datetime > target_date:
-            if r["nextPageToken"]:
-                token = r["nextPageToken"]
-                r = query_playlistitems_api(saved_playlist_id, token)
-                oldest_response_datetime = get_oldest_date_in_response(r)
-                add_response_vids_to_list(r)
+            if resp["nextPageToken"]:
+                token = resp["nextPageToken"]
+                resp = query_playlistitems_api(saved_playlist_id, token)
+                oldest_response_datetime = get_oldest_date_in_response(resp)
+                add_response_vids_to_list(resp)
             else:
                 break
         grab_ids_in_date(target_date)
