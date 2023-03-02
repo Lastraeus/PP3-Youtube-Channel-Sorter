@@ -211,7 +211,7 @@ def output_results(results, response, last_date):
     yesno = pyip.inputYesNo(default="no")
     if yesno == "yes":
         full_output_string = make_full_results_string(output_header_string)
-        newfile = saveresults.string_to_txt_file(full_output_string)
+        # newfile = saveresults.string_to_txt_file(full_output_string)
         try:
             saveresults.upload_file_to_gdrive(newfile, "txt")
             remove(newfile)

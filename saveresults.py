@@ -50,10 +50,20 @@ def string_to_txt_file(string):
     return filepath
 
 
-def upload_file_to_gdrive(file_path, folder_name):
-    """Take the filepath of the new file and target folder of the gdrive,
-    creates a instance pydrive2 instance then uploads it to drive.
-    Sets permissions for the file to sharable and provides the link"""
+def set_mime_type(type):
+    """returns the correct string for gdrive to determine filetype"""
+    mime_type = "text/plain"
+    if type == 'json':
+        mime_type = 'application/json'
+        return mime_type
+    else:
+        return mime_type
+
+
+def upload_file_to_gdrive(content, filename, file_type):
+    """Creates a instance pydrive2 file, with the inputted details
+    then uploads it to drive. Sets permissions for the file to 
+    sharable and provides the link"""
     scope = ["https://www.googleapis.com/auth/drive"]
     gauth = GoogleAuth()
     gauth.auth_method = 'service'
@@ -63,12 +73,18 @@ def upload_file_to_gdrive(file_path, folder_name):
         )
     drive = GoogleDrive(gauth)
 
-    if folder_name == "txt":
-        folder_id = '1OzCotUCYfZEhczTSBD-WnwA_TJbyPiNZ'  # txt folder
+    folder_id = '1Of9A2YgSDtcuh6yt8Vc3uTFE9LKtbZH_'  # /sorter/all folder
 
+    mimetype = set_mime_type(file_type)
+        
     file1 = drive.CreateFile(
-        {'parents': [{"id": folder_id}]})
-    file1.SetContentFile(file_path)
+        {
+            'parents': [{"id": folder_id}],
+            'title': filename,
+            'mimeType': mimetype,
+        }
+        )
+    file1.SetContentString(content)
     file1.Upload()
     file1.InsertPermission({
         'type': 'anyone',
@@ -77,3 +93,32 @@ def upload_file_to_gdrive(file_path, folder_name):
     print('Your result is saved at the link below.')
     print('Select it with mouse and right click --> copy \n')
     print(file1['alternateLink'])
+
+
+# def upload_file_to_gdrive(file_path, folder_name):
+#     """Take the filepath of the new file and target folder of the gdrive,
+#     creates a instance pydrive2 instance then uploads it to drive.
+#     Sets permissions for the file to sharable and provides the link"""
+#     scope = ["https://www.googleapis.com/auth/drive"]
+#     gauth = GoogleAuth()
+#     gauth.auth_method = 'service'
+#     gauth.credentials = ServiceAccountCredentials.from_json_keyfile_name(
+#         'drive_creds.json',
+#         scope
+#         )
+#     drive = GoogleDrive(gauth)
+
+#     if folder_name == "txt":
+#         folder_id = '1OzCotUCYfZEhczTSBD-WnwA_TJbyPiNZ'  # txt folder
+
+#     file1 = drive.CreateFile(
+#         {'parents': [{"id": folder_id}]})
+#     file1.SetContentFile(file_path)
+#     file1.Upload()
+#     file1.InsertPermission({
+#         'type': 'anyone',
+#         'value': 'anyone',
+#         'role': 'reader'})
+#     print('Your result is saved at the link below.')
+#     print('Select it with mouse and right click --> copy \n')
+#     print(file1['alternateLink'])
