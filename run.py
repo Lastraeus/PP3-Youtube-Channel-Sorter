@@ -366,11 +366,17 @@ def query_vids(id_list):
             )
 
             vid_response = vid_request.execute()
-
+            
             for item in vid_response['items']:
                 vid_views = item['statistics']['viewCount']
-                vid_likes = item['statistics']['likeCount']
-                vid_comments = item['statistics']['commentCount']
+                try:
+                    vid_likes = item['statistics']['likeCount']
+                except KeyError:
+                    vid_likes = ""
+                try:
+                    vid_comments = item['statistics']['commentCount']
+                except KeyError:
+                    vid_comments = ""
                 published = item["snippet"]["publishedAt"]
                 vid_id = item['id']
                 title = item["snippet"]["title"]
