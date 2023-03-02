@@ -3,9 +3,9 @@ from pydrive2.drive import GoogleDrive
 from oauth2client.service_account import ServiceAccountCredentials
 
 
-def upload_file_to_gdrive(content, filename, file_type):
+def upload_file_to_gdrive(content, filename):
     """Creates a instance pydrive2 file, with the inputted details
-    then uploads it to drive. Sets permissions for the file to 
+    then uploads it to drive. Sets permissions for the file to
     sharable and provides the link"""
     scope = ["https://www.googleapis.com/auth/drive"]
     gauth = GoogleAuth()
@@ -19,7 +19,7 @@ def upload_file_to_gdrive(content, filename, file_type):
     folder_id = '1Of9A2YgSDtcuh6yt8Vc3uTFE9LKtbZH_'  # /sorter/all folder
 
     mimetype = "text/plain"
-        
+
     file1 = drive.CreateFile(
         {
             'parents': [{"id": folder_id}],
@@ -36,6 +36,3 @@ def upload_file_to_gdrive(content, filename, file_type):
     print('Your result is saved at the link below.')
     print('Select it with mouse and right click --> copy \n')
     print(file1['alternateLink'])
-
-
-

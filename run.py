@@ -1,7 +1,6 @@
 import math
 import json
 import datetime
-from os import remove, system 
 
 import pytube  # specifically https://github.com/felipeucelli/pytube.git
 import pyinputplus as pyip
@@ -14,14 +13,14 @@ import saveresults
 from ascii import logo1
 
 # YouTube API query componenet variables--------------------------------------
-api_service_name = "youtube"
-api_version = "v3"
-f = open("yt_creds.json")
-api_key_data = json.load(f)
-DEVELOPER_KEY = api_key_data["key1"]
+API_SERVICE_NAME = "youtube"
+API_VERSION = "v3"
+f = open("yt_creds.json", encoding="utf-8")
+API_KEY_DATA = json.load(f)
+DEVELOPER_KEY = API_KEY_DATA["key1"]
 youtube = googleapiclient.discovery.build(
-    api_service_name,
-    api_version,
+    API_SERVICE_NAME,
+    API_VERSION,
     developerKey=DEVELOPER_KEY
     )
 
@@ -43,14 +42,14 @@ ACCEPTED_TIMEFRAMES = ["y", "s", "m", "w"]
 ACCEPTED_ORDERS = ["desc", "asc"]
 
 
-selected_sort = "views"
-selected_num_results = 5
-selected_order = "desc"
+DEFAULT_SORT = "views"
+DEFAULT_NUM_TO_OUTPUT = 3
+DEFAULT_ORDER = "desc"
 
 sort_settings = [
-    selected_sort,
-    selected_num_results,
-    selected_order]
+    DEFAULT_SORT,
+    DEFAULT_NUM_TO_OUTPUT,
+    DEFAULT_ORDER]
 
 # Welcome and Prompt Fucntion Section ----------------------------------------
 
@@ -67,7 +66,7 @@ def print_initial_screen():
     print('There will be a option to resort, reprint')
     print('and save the full results at the end\n')
     print("Hint: Right Click and copy/paste the link from youtube website\n")
-    
+
 
 def channel_prompt():
     """Asks for a channel url to sort, then uses pytube
@@ -171,7 +170,7 @@ def query_vids(id_list):
             )
 
             vid_response = vid_request.execute()
-            
+
             for item in vid_response['items']:
                 vid_views = item['statistics']['viewCount']
                 try:
@@ -272,7 +271,6 @@ def get_credits_used(total_videos):
     return quota_credits_used
 
 
-
 # Utility Function Section --------------------------------------------------
 
 
@@ -312,26 +310,32 @@ def ask_restart():
 
 
 def select_new_sort_settings():
+    """Querys the user on what sort of sorting they want to do
+    validation with pyinputplus
+    clears the previous list of settings and adds new ones as required."""
     sort = pyip.inputMenu(
         ACCEPTED_SORTS,
-        prompt="What way do you want to sort the results?\n", 
+        prompt="What way do you want to sort the results?\n",
         default="views",
         numbered=True)
+    print(f'You chose: {sort}\n')
 
     num = pyip.inputMenu(
         ACCEPTED_NUM_OF_RESULTS,
-        prompt="How many results do you want to display in this terminal?\n", 
+        prompt="How many results do you want to display in this terminal?\n",
         default=5,
         lettered=True)
-    
+    print(f'You chose: {num}\n')
+
     num = int(num)
-    
+
     order = pyip.inputMenu(
         ACCEPTED_ORDERS,
-        prompt="How do you want to order them, Decending Or Ascending?\n", 
+        prompt="How do you want to order them, Decending Or Ascending?\n",
         default="desc",
         numbered=True)
-    
+    print(f'You chose: {order}\n')
+
     sort_settings.clear()
     sort_settings.append(sort)
     sort_settings.append(num)
@@ -377,14 +381,14 @@ def output_results(
 
     print(terminal_output_results_string)
     print(LINE_STRING)
-    print('Would you like to save the full list of these results to a text file?')
+    print('Would you like to save the FULL list of the results to a txt file?')
     print('Enter y/n')
     yesno = pyip.inputYesNo(default="no")
     if yesno == "yes":
         full_output_string = make_full_results_string(output_header_string)
         new_now = live_now().strftime("%Y-%m-%d-%H-%M-%S")
         filename = f'{new_now}-{channel_title}-{sort_by}'
-        saveresults.upload_file_to_gdrive(full_output_string, filename, "txt")
+        saveresults.upload_file_to_gdrive(full_output_string, filename)
 
 
 def make_header_string(
@@ -472,6 +476,10 @@ def make_full_results_string(output_header_string):
 
 # Main() Section -------------------------------------------------------------
 def main_search():
+    """The Main search loop. Takes the user from inputting valid url,
+    through timeframe selection, and then makes query calls to youtube api
+    returns metadata after query_vids() has added all neccessary items to
+    vids_in_target_time"""
     resp = None
     while resp is None:
         channel_playlist_id = None
@@ -505,28 +513,33 @@ def main_search():
 
 
 def main():
-    """Allows the user to input a channel id, and then view the results
-    before saving them (as a google drive download link) and exiting
-    Can optionally do another search instead of exiting"""
-    while True:
-        print_initial_screen()
-        org_resp, last_video_date = main_search()
+    """Holds main loop(for multiple searches), Runs welcome screen, runs
+    main_search then moves to output. Loops output while user is still
+    sorting the results. moves to asking the user for another search from
+    the start, exits if they are done."""
+    try:
+        while True:
+            print_initial_screen()
+            org_resp, last_video_date = main_search()
 
-        while len(sort_settings) > 0:
-            output_results(
-                org_resp,
-                last_video_date,
-                sort_settings
-                )
-            print('Would you like to sort these results differently?')
-            print('Enter y/n')
-            yesno = pyip.inputYesNo(default="no")
-            if yesno == "yes":
-                select_new_sort_settings()
-            else:
-                sort_settings.clear()
+            while len(sort_settings) > 0:
+                output_results(
+                    org_resp,
+                    last_video_date,
+                    sort_settings
+                    )
+                print('Would you like to sort these results differently?')
+                print('Enter y/n')
+                yesno = pyip.inputYesNo(default="no")
+                if yesno == "yes":
+                    select_new_sort_settings()
+                else:
+                    sort_settings.clear()
 
-        ask_restart()
+            ask_restart()
+    except KeyboardInterrupt:
+        print("Unfortuneatly Ctrl-C is the shortcut to exit this template.")
+        print("Please run again.")
 
 
 if __name__ == "__main__":
