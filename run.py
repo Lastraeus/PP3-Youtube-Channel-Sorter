@@ -328,7 +328,7 @@ def divide_chunks(list_to_divide, max_chunk_size):
     used to divide id_lists that are too long for googles multi_video list
     api query"""
     for i in range(0, len(list_to_divide), max_chunk_size):
-        yield list_to_divide[i:i + max]
+        yield list_to_divide[i:i + max_chunk_size]
 
 
 # YouTube Query API Functions Section ----------------------------------------
