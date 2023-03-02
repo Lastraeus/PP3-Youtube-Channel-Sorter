@@ -1,7 +1,7 @@
 import math
 import json
 import datetime
-from os import remove
+from os import remove, system 
 
 import pytube  # specifically https://github.com/felipeucelli/pytube.git
 import pyinputplus as pyip
@@ -41,6 +41,7 @@ DEFAULT_NUM_OF_RESULTS = 3
 
 
 def print_initial_screen():
+
     """Prints The Logo and Initial details of app"""
     print(logo1)
     print("Welcome to the YouTube Channel Sorter")
@@ -415,6 +416,7 @@ def main():
     """Allows the user to input a channel id, and then view the results
     before saving them (as a google drive download link) and exiting
     Can optionally do another search instead of exiting"""
+    system('clear')
     while True:
         print_initial_screen()
         resp = None
