@@ -66,8 +66,6 @@ def print_initial_screen():
     print('Sort by views and show top 5 results')
     print('There will be a option to resort, reprint')
     print('and save the full results at the end\n')
-    print('TYPE "help" FOR INSTRUCTIONS\n')
-    print('TYPE "custom" to set the options prior to searching \n')
     print("Hint: Right Click and copy/paste the link from youtube website\n")
     
 
@@ -384,7 +382,8 @@ def output_results(
     yesno = pyip.inputYesNo(default="no")
     if yesno == "yes":
         full_output_string = make_full_results_string(output_header_string)
-        filename = "sometitle"
+        new_now = live_now().strftime("%Y-%m-%d-%H-%M-%S")
+        filename = f'{new_now}-{channel_title}-{sort_by}'
         saveresults.upload_file_to_gdrive(full_output_string, filename, "txt")
 
 
