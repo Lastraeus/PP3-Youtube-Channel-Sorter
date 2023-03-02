@@ -41,7 +41,7 @@ ACCEPTED_NUM_OF_RESULTS = ["1", "3", "5", "10"]
 ACCEPTED_TIMEFRAMES = ["y", "s", "m", "w"]
 ACCEPTED_ORDERS = ["desc", "asc"]
 
-
+default_string = 'Sort by Views and show top 3 results\n'
 DEFAULT_SORT = "views"
 DEFAULT_NUM_TO_OUTPUT = 3
 DEFAULT_ORDER = "desc"
@@ -60,12 +60,12 @@ def print_initial_screen():
     print("Welcome to the YouTube Channel Sorter")
     print("Created by Cian Lane\n")
     print("See https://github.com/Lastraeus/PP3-Youtube-Channel-Sorter")
-    print("for README and full credits\n\n")
+    print("for README and full credits\n")
     print("The Default search sort will be:\n")
-    print('Sort by views and show top 5 results')
+    print(default_string)
     print('There will be a option to resort, reprint')
     print('and save the full results at the end\n')
-    print("Hint: Right Click and copy/paste the link from youtube website\n")
+    print("Hint: Right-Click and copy/paste the link from youtube itself\n")
 
 
 def channel_prompt():
@@ -73,7 +73,7 @@ def channel_prompt():
     to validate any possible valid YouTube URL
     Returns the playlist ID of the channel if found with pytube.
     if the search failed it lets the user know to try again"""
-    inputted_url = input("Please input a valid channel URL \n")
+    inputted_url = input("Please input a valid channel URL:\n")
 
     try:
         channel = pytube.Channel(inputted_url)
