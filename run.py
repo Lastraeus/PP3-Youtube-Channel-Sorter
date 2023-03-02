@@ -25,7 +25,7 @@ youtube = googleapiclient.discovery.build(
     developerKey=DEVELOPER_KEY
     )
 
-#MISC INITIAL VARIABLES ------------------------------------------------------
+# MISC INITIAL VARIABLES -----------------------------------------------------
 live_now = datetime.datetime.now  # run as live_now()
 api_response_meta = {}
 full_vid_list = []
@@ -37,7 +37,7 @@ SAMPLE_RETURN_DATE = parser.parse("2022-09-19T18:08:46Z")
 
 
 # Search option DEFAULTS and variables ---------------------------------------
-ACCEPTED_SORTS = ["views", "title", "likes", "comments", "dates"]
+ACCEPTED_SORTS = ["views", "title", "likes", "comments", "date"]
 ACCEPTED_NUM_OF_RESULTS = ["1", "3", "5", "10"]
 ACCEPTED_TIMEFRAMES = ["y", "s", "m", "w"]
 ACCEPTED_ORDERS = ["desc", "asc"]
@@ -185,6 +185,7 @@ def query_vids(id_list):
                 except KeyError:
                     vid_comments = ""
                 date = item["snippet"]["publishedAt"]
+                channel = item["snippet"]["channelTitle"]
                 vid_id = item['id']
                 title = item["snippet"]["title"]
                 yt_link = f'https://youtu.be/{vid_id}'
@@ -196,7 +197,8 @@ def query_vids(id_list):
                         'comments': vid_comments,
                         'views': int(vid_views),
                         'url': yt_link,
-                        "date": date
+                        "date": date,
+                        'channel': channel
                     }
                 )
 
@@ -218,13 +220,6 @@ def split_vid_list_query(list_of_vid_id_lists):
 
 
 # Response Parsing Section ---------------------------------------------------
-
-
-def get_total_channel_vids(response):
-    """searches the api response json for the total
-    video count on the channel"""
-    total_channel_videos = response["pageInfo"]["totalResults"]
-    return total_channel_videos
 
 
 def get_oldest_date_in_response(response):
@@ -281,6 +276,8 @@ def get_credits_used(total_videos):
 
 
 # Utility Function Section --------------------------------------------------
+
+
 def divide_chunks(list_to_divide, max_chunk_size):
     """Divides a list of items into a list of smaller lists of size max
     used to divide id_lists that are too long for googles multi_video list
@@ -314,8 +311,9 @@ def ask_restart():
         exit()
 
 # Output Results After Searching/Parsing Section -----------------------------
+
+
 def select_new_sort_settings():
-    new_sort_list = []
     sort = pyip.inputMenu(
         ACCEPTED_SORTS,
         prompt="What way do you want to sort the results?\n", 
@@ -348,7 +346,8 @@ def output_results(
         settings_list):
     """combines and formats the gathered data and then outputs it for the user.
     offers them a choice of saving the full result as a google drive link"""
-    total_channel_vids = get_total_channel_vids(response)
+    channel_title = vids_in_target_time[0]["channel"]
+    total_channel_vids = response["pageInfo"]["totalResults"]
     total_vids_in_timeframe = len(vids_in_target_time)
     quota_used = get_credits_used(total_vids_in_timeframe)
 
@@ -369,7 +368,8 @@ def output_results(
         total_channel_vids,
         total_vids_in_timeframe,
         last_date,
-        quota_used)
+        quota_used,
+        channel_title)
 
     terminal_output_results_string = make_terminal_results_string(
         output_header_string,
@@ -392,12 +392,14 @@ def make_header_string(
         total_channel_vids,
         total_vids_in_timeframe,
         last_date,
-        quota_used):
+        quota_used,
+        channel_title):
     """Combines meta info for the search and makes a header string to
     go at the top of the result output. Returns the string"""
 
     output_header_list = []
     output_header_list.append(LINE_STRING)
+    output_header_list.append(f'Channel Title: {channel_title}')
     output_header_list.append(
         f'Channel has {total_channel_vids} total visible videos\n'
         )
@@ -432,6 +434,9 @@ def make_terminal_results_string(
         output_results_list.append(video["title"])
         output_results_list.append(
             f'Views: {video["views"]}, Published: {video["date"]}'
+            )
+        output_results_list.append(
+            f'Likes: {video["likes"]}, Comments: {video["comments"]}'
             )
         output_results_list.append(f'{video["url"]}\n')
     terminal_output_results_string = "\n".join(output_results_list)
@@ -470,7 +475,9 @@ def make_full_results_string(output_header_string):
 def main_search():
     resp = None
     while resp is None:
-        channel_playlist_id = channel_prompt()
+        channel_playlist_id = None
+        while channel_playlist_id is None:
+            channel_playlist_id = channel_prompt()
         saved_playlist_id = channel_playlist_id
         target_date = None
         while target_date is None:
