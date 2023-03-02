@@ -160,6 +160,10 @@ create new file on drive https://docs.iterative.ai/PyDrive2/pydrive2/#pydrive2.d
 
 datetime in specific format https://stackoverflow.com/questions/7999935/python-datetime-to-string-without-microsecond-component
 
+clear screen for initial run.py line in template https://www.geeksforgeeks.org/clear-screen-python/
+
+justify https://www.tutorialspoint.com/python/string_rjust.htm
+
 ### __Content__
 __Text Content__
 
