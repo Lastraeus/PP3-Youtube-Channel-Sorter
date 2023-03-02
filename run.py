@@ -41,7 +41,7 @@ ACCEPTED_NUM_OF_RESULTS = ["1", "3", "5", "10"]
 ACCEPTED_TIMEFRAMES = ["y", "s", "m", "w"]
 ACCEPTED_ORDERS = ["desc", "asc"]
 
-default_string = 'Sort by Views and show top 3 results\n'
+DEFAULT_STRING = 'Sort by Views and show top 3 results\n'
 DEFAULT_SORT = "views"
 DEFAULT_NUM_TO_OUTPUT = 3
 DEFAULT_ORDER = "desc"
