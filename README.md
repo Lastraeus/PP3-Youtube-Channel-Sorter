@@ -154,6 +154,12 @@ refference for basic pydrive2 use https://stackoverflow.com/questions/46562255/p
 
 RE linter warning about missing dynamically created attribute on google service api call https://stackoverflow.com/questions/35990313/avoid-pylint-warning-e1101-instance-of-has-no-member-for-class-with-dyn/54156144#54156144
 
+check file on drive https://docs.iterative.ai/PyDrive2/filemanagement/#get-files-by-complex-queries
+
+create new file on drive https://docs.iterative.ai/PyDrive2/pydrive2/#pydrive2.drive.GoogleDrive.CreateFile
+
+datetime in specific format https://stackoverflow.com/questions/7999935/python-datetime-to-string-without-microsecond-component
+
 ### __Content__
 __Text Content__
 

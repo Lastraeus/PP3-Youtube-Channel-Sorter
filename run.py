@@ -13,43 +13,61 @@ from dateutil import parser
 import saveresults
 from ascii import logo1
 
-# INITIAL VARIABLES ----------------------------------------------------------
+
+
+# Search option DEFAULTS and variables ---------------------------------------
+ACCEPTED_SORTS = ["views", "titles", "likes", "comments", "dates"]
+ACCEPTED_Num_OF_RESULTS = [1, 3, 5, 10]
+ACCEPTED_TIMEFRAMES = ["y", "s", "m", "w"]
+ACCEPTED_ORDERS = ["desc", "asc"]
+
+order_by = 'views'
+num_of_results = 5
+selected_timeframe = "s" # last six months
+selected_order = "desc"
+
+# YouTube API query componenet variables--------------------------------------
 api_service_name = "youtube"
 api_version = "v3"
 f = open("yt_creds.json")
 api_key_data = json.load(f)
 DEVELOPER_KEY = api_key_data["key1"]
-SAMPLE_RETURN_DATE = parser.parse("2022-09-19T18:08:46Z")
-# used to get correct timezone for comparison
-
-ACCEPTED_TIMEFRAMES = ["y", "s", "m", "w"]
-live_now = datetime.datetime.now  # run as live_now()
-api_response_meta = {}
-full_vid_list = []
 youtube = googleapiclient.discovery.build(
     api_service_name,
     api_version,
     developerKey=DEVELOPER_KEY
     )
+
+#MISC INITIAL VARIABLES ------------------------------------------------------
+live_now = datetime.datetime.now  # run as live_now()
+api_response_meta = {}
+full_vid_list = []
 vid_id_list = []
 vids_in_target_time = []
 LINE_STRING = "-" * 80  # Max width of template terminal is 80 chars
-DEFAULT_SORT_ORDER = 'views'
-DEFAULT_NUM_OF_RESULTS = 3
+SAMPLE_RETURN_DATE = parser.parse("2022-09-19T18:08:46Z")
+# used to get correct timezone for comparison
 
 # Welcome and Prompt Fucntion Section ----------------------------------------
 
 
 def print_initial_screen():
-
     """Prints The Logo and Initial details of app"""
     print(logo1)
     print("Welcome to the YouTube Channel Sorter")
     print("Created by Cian Lane\n")
     print("See https://github.com/Lastraeus/PP3-Youtube-Channel-Sorter")
     print("for README and full credits\n\n")
+    print("for README and full credits\n\n")
+    print(default_options_view)
+    print("Hint: Right Click and copy/paste is all that works here :(\n")
 
-    print("Hint: Right Click and copy/paste is all that works here :(\n\n")
+def default_options_view(
+    sort,
+    timeframe,
+    num_of_results,
+    order):
+        
 
 
 def channel_prompt():

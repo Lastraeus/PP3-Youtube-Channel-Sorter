@@ -5,49 +5,49 @@ from pydrive2.drive import GoogleDrive
 from oauth2client.service_account import ServiceAccountCredentials
 
 
-def leading_zeros_filenum(num):
-    """Takes a int and returns a string with 5 leading zeros.
-    For use as a file number"""
-    result = f'{num:05d}'
-    return result
+# def leading_zeros_filenum(num):
+#     """Takes a int and returns a string with 5 leading zeros.
+#     For use as a file number"""
+#     result = f'{num:05d}'
+#     return result
 
 
-def save_data_to_json(data):
-    """takes a json compatitble object and saves it as a json to the
-    outputs/json folder returns the filepath to it."""
-    isExist = os.path.exists("/outputs")
-    if not isExist:
-        os.makedirs("/outputs")
-    filenum = 1
-    filenum_string = leading_zeros_filenum(filenum)
-    filepath = (f'outputs/output{filenum_string}.json')
-    while os.path.exists(filepath):
-        filenum = filenum + 1
-        filenum_string = leading_zeros_filenum(filenum)
-        filepath = (f'outputs/output{filenum_string}.json')
-    jsonString = json.dumps(data)
-    jsonFile = open(filepath, "w")
-    jsonFile.write(jsonString)
-    jsonFile.close()
-    return filepath
+# def save_data_to_json(data):
+#     """takes a json compatitble object and saves it as a json to the
+#     outputs/json folder returns the filepath to it."""
+#     isExist = os.path.exists("/outputs")
+#     if not isExist:
+#         os.makedirs("/outputs")
+#     filenum = 1
+#     filenum_string = leading_zeros_filenum(filenum)
+#     filepath = (f'outputs/output{filenum_string}.json')
+#     while os.path.exists(filepath):
+#         filenum = filenum + 1
+#         filenum_string = leading_zeros_filenum(filenum)
+#         filepath = (f'outputs/output{filenum_string}.json')
+#     jsonString = json.dumps(data)
+#     jsonFile = open(filepath, "w")
+#     jsonFile.write(jsonString)
+#     jsonFile.close()
+#     return filepath
 
 
-def string_to_txt_file(string):
-    """takes string and saves it as a txt file to the outputs/txt folder
-    returns the filepath to it."""
-    isExist = os.path.exists("outputs/")
-    if not isExist:
-        os.makedirs("outputs")
-    filenum = 1
-    filenum_string = leading_zeros_filenum(filenum)
-    filepath = (f'outputs/output{filenum_string}.txt')
-    while os.path.exists(filepath):
-        filenum = filenum + 1
-        filenum_string = leading_zeros_filenum(filenum)
-        filepath = (f'outputs/output{filenum_string}.txt')
-    with open(filepath, 'w') as f:
-        f.write(string)
-    return filepath
+# def string_to_txt_file(string):
+#     """takes string and saves it as a txt file to the outputs/txt folder
+#     returns the filepath to it."""
+#     isExist = os.path.exists("outputs/")
+#     if not isExist:
+#         os.makedirs("outputs")
+#     filenum = 1
+#     filenum_string = leading_zeros_filenum(filenum)
+#     filepath = (f'outputs/output{filenum_string}.txt')
+#     while os.path.exists(filepath):
+#         filenum = filenum + 1
+#         filenum_string = leading_zeros_filenum(filenum)
+#         filepath = (f'outputs/output{filenum_string}.txt')
+#     with open(filepath, 'w') as f:
+#         f.write(string)
+#     return filepath
 
 
 def set_mime_type(type):
