@@ -325,6 +325,11 @@ def ask_restart():
 
 
 def output_loop(org_resp, last_video_date):
+    """Runs a default search first, for ease of use,
+    then prompts the user if they want to sort the current results in
+    timeframe differently, updates the sort settings and keeps going
+    until user is done resorting and saving the results they want from
+    that particular channel & timeframe"""
     settings = DEFAULT_SETTINGS
     keep_sorting = True
     while keep_sorting:
@@ -337,6 +342,8 @@ def output_loop(org_resp, last_video_date):
 
 
 def new_settings_prompt():
+    """gets the users consent to continue resorting results returned from query
+    indicates to output_loop the users desire to keep resorting"""
     print('Would you like to sort these results differently?')
     print('Enter y/n')
     yesno = pyip.inputYesNo(default="no")
@@ -353,7 +360,7 @@ def new_settings_prompt():
 def select_new_sort_settings():
     """Querys the user on what sort of sorting they want to do
     validation with pyinputplus
-    clears the previous list of settings and adds new ones as required."""
+    generates a new list of settings which it returns"""
     sort = pyip.inputMenu(
         ACCEPTED_SORTS,
         prompt="What way do you want to sort the results?\n",
