@@ -1,4 +1,4 @@
-# Cian's Code Institute Final Grade Calculator - PP2:
+# Youtube-Channel-Sorter - PP3:
 
 ## [Link to live website](https://youtube-channel-sorter.herokuapp.com/)
 
