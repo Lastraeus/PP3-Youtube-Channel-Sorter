@@ -46,10 +46,6 @@ DEFAULT_SORT = "views"
 DEFAULT_NUM_TO_OUTPUT = 3
 DEFAULT_ORDER = "desc"
 
-sort_settings = [
-    DEFAULT_SORT,
-    DEFAULT_NUM_TO_OUTPUT,
-    DEFAULT_ORDER]
 
 # Welcome and Prompt Fucntion Section ----------------------------------------
 
@@ -300,7 +296,8 @@ def handle_error_reason(error_reason):
 def ask_restart():
     """asks the user if they would like to search again, if not
     it then ends the program"""
-    print('Would you like to run another search? y/n')
+    print('Would you like to run another search? y/n?')
+    print()
     yesno = pyip.inputYesNo(default="no")
     if yesno == "no":
         print("Goodbye!")
@@ -521,6 +518,11 @@ def main():
         while True:
             print_initial_screen()
             org_resp, last_video_date = main_search()
+
+            sort_settings = [
+                DEFAULT_SORT,
+                DEFAULT_NUM_TO_OUTPUT,
+                DEFAULT_ORDER]
 
             while len(sort_settings) > 0:
                 output_results(
