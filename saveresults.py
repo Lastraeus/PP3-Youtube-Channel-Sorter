@@ -40,7 +40,7 @@ def upload_txt_file_to_gdrive(content, filename):
         'type': 'anyone',
         'value': 'anyone',
         'role': 'reader'})
-    print()
+
     print('Your result is saved at the link below.')
     print('Select it with mouse and right click --> copy \n')
-    print(file1['alternateLink'])
+    print(file1['alternateLink'] + "\n")

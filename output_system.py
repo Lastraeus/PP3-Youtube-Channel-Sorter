@@ -50,9 +50,8 @@ def new_settings_prompt():
     """gets the users consent to continue resorting results returned from query
     indicates to output_loop the users desire to keep resorting"""
     print('Would you like to sort these results differently?')
-    print('Enter y/n')
-    yesno = pyip.inputYesNo(default="no")
-    if yesno == "yes":
+    yes_no = pyip.inputYesNo(prompt="Enter y/n \n", default="no")
+    if yes_no == "yes":
         settings = select_new_sort_settings()
         keep_sorting = True
         return settings, keep_sorting

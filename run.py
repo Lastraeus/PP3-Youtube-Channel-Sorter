@@ -18,6 +18,10 @@ from dateutil import parser
 from ascii import LOGO
 import output_system as out
 
+SAMPLE_RETURN_DATE = parser.parse("2022-09-19T18:08:46Z")
+# used to get correct timezone for comparison
+# (Taken from test qurey result)
+
 # YouTube API query componenet variables--------------------------------------
 # https://medium.com/mcd-unison
 # /youtube-data-api-v3-in-python-tutorial-with-examples-e829a25d2ebd#5999
@@ -198,15 +202,15 @@ def query_vids(id_list, target_list):
 
     else:
         list_of_vid_id_lists = list(divide_chunks(id_list, 50))
-        split_vid_list_query(list_of_vid_id_lists)
+        split_vid_list_query(list_of_vid_id_lists, target_list)
 
 
-def split_vid_list_query(list_of_vid_id_lists):
+def split_vid_list_query(list_of_vid_id_lists, target_list):
     """Feeds a block of 50 video ids to api to query,
     due to max of 50 ids submitted per query
     all of which end up appended to vids_in_target_time dictionary"""
     for id_list in list_of_vid_id_lists:
-        query_vids(id_list)
+        query_vids(id_list, target_list)
 
 
 # Response Parsing Section ---------------------------------------------------
@@ -236,10 +240,10 @@ def add_playlist_items_to_list(response):
     to the full_playlist_items_list"""
     returned_videos = response["items"]
     items_list = []
-    
+
     for item in returned_videos:
         items_list.append(item)
-    
+
     return items_list
 
 
@@ -262,7 +266,7 @@ def grab_ids_in_date(target_date, items_list):
         item_datetime = parser.parse(item["snippet"]["publishedAt"])
         if item_datetime > target_date:
             out_list.append(item['contentDetails']['videoId'])
-    
+
     return out_list
 
 
@@ -296,10 +300,9 @@ def handle_error_reason(error_reason):
 def ask_restart():
     """asks the user if they would like to search again, if not
     it then ends the program"""
-    print('Would you like to run another search? y/n?')
-    print()
-    yesno = pyip.inputYesNo(default="no")
-    if yesno == "no":
+    print('Would you like to run another search? y/n?\n')
+    yes_no = pyip.inputYesNo(default="no")
+    if yes_no == "no":
         print("Goodbye!")
         exit()
 
@@ -323,10 +326,6 @@ def main_search():
         while target_date is None:
             target_date = timeframe_prompt()
 
-        SAMPLE_RETURN_DATE = parser.parse("2022-09-19T18:08:46Z")
-        # used to get correct timezone for comparison
-        # (Taken from test qurey result)
-
         target_date = date_format_to_google_dates(
             target_date,
             SAMPLE_RETURN_DATE)
@@ -338,7 +337,7 @@ def main_search():
     oldest_response_datetime = get_oldest_date_in_response(resp)
 
     full_playlist_items_list = []
-    
+
     full_playlist_items_list = add_playlist_items_to_list(
         resp)
     while oldest_response_datetime > target_date:
