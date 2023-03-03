@@ -1,5 +1,10 @@
 """
-Runs and organizes the main operations of the YouTube Channel Sorter App"""
+Runs and organizes the main operations of the YouTube Channel Sorter App.
+Handles welcome screen, initial user prompts,
+parsing user prompts into appropriate querys
+and the youtube api querys themselves.
+Passes the results to output_system.py for
+final outputting."""
 import json
 import datetime
 
@@ -14,7 +19,8 @@ from ascii import LOGO
 import output_system as out
 
 # YouTube API query componenet variables--------------------------------------
-# https://medium.com/mcd-unison/youtube-data-api-v3-in-python-tutorial-with-examples-e829a25d2ebd#5999
+# https://medium.com/mcd-unison
+# /youtube-data-api-v3-in-python-tutorial-with-examples-e829a25d2ebd#5999
 # for initial query template
 API_SERVICE_NAME = "youtube"
 API_VERSION = "v3"
@@ -26,16 +32,6 @@ youtube = googleapiclient.discovery.build(
     API_VERSION,
     developerKey=DEVELOPER_KEY
     )
-
-# MISC INITIAL VARIABLES -----------------------------------------------------
-live_now = datetime.datetime.now  # run as live_now()
-api_response_meta = {}
-full_vid_list = []
-vid_id_list = []
-vids_in_target_time = []
-LINE_STRING = "-" * 80  # Max width of template terminal is 80 chars
-SAMPLE_RETURN_DATE = parser.parse("2022-09-19T18:08:46Z")
-# used to get correct timezone for comparison
 
 
 # Welcome and Prompt Fucntion Section ----------------------------------------
@@ -86,7 +82,7 @@ Last (Y)ear, Last (S)ix Months, Last (M)onth, Last (W)eek
     selected_timeframe = selected_timeframe.lower()
     if selected_timeframe in out.ACCEPTED_TIMEFRAMES:
         timeframe = calculate_past_timeframes(selected_timeframe)
-        print(LINE_STRING)
+        print(out.LINE_STRING)
         print("Loading Selected Results")
         print("This can take a minute if the channel has many videos")
         return timeframe
@@ -98,6 +94,7 @@ Last (Y)ear, Last (S)ix Months, Last (M)onth, Last (W)eek
 def calculate_past_timeframes(input_letter):
     """Accepts the selected timeframe letter and converts that to a
     datetime unit"""
+    live_now = datetime.datetime.now  # run as live_now()
     if input_letter == "y":
         # https://stackoverflow.com/questions/546321
         # /how-do-i-calculate-the-date-six
@@ -130,7 +127,7 @@ def calculate_past_timeframes(input_letter):
 # /blob/master/Python/YouTube-API/03-Most-Popular-Video-Playlist/start.py
 # was heavily refferenced here for my api query functions needs
 def query_playlistitems_api(playlist_id, token=None):
-    """takes a playlist ID from prompt and returns the json response 'r'"""
+    """takes a playlist ID from prompt and returns the json response"""
     play_list_request = youtube.playlistItems().list(
         part="snippet,contentDetails",
         maxResults=50,
@@ -141,17 +138,18 @@ def query_playlistitems_api(playlist_id, token=None):
     # 23945784/how-to-manage-google-api-errors-in-python
     try:
         resp = play_list_request.execute()
+        print("API call was a sucess")
         return resp
     except HttpError as err:
         if err.resp.get('content-type', '').startswith('application/json'):
             reason = json.loads(err.content).get('error').get('errors')[0].get(
                 'reason'
                 )
-            handle_error_reason(reason)
+            print(reason)
             return None
 
 
-def query_vids(id_list):
+def query_vids(id_list, target_list):
     """takes a list of video ids and then returns details about them.
     All items are appended to vids_in_target_time dict"""
     next_page_token = None
@@ -181,7 +179,7 @@ def query_vids(id_list):
                 title = item["snippet"]["title"]
                 yt_link = f'https://youtu.be/{vid_id}'
 
-                vids_in_target_time.append(
+                target_list.append(
                     {
                         'title': title,
                         'likes': vid_likes,
@@ -197,6 +195,7 @@ def query_vids(id_list):
 
             if not next_page_token:
                 break
+
     else:
         list_of_vid_id_lists = list(divide_chunks(id_list, 50))
         split_vid_list_query(list_of_vid_id_lists)
@@ -232,12 +231,16 @@ def get_oldest_date_in_response(response):
         return oldest_datetime
 
 
-def add_response_vids_to_list(response):
+def add_playlist_items_to_list(response):
     """After a playlist query is searched, add the found video json items
-    to the full_vid_list"""
+    to the full_playlist_items_list"""
     returned_videos = response["items"]
+    items_list = []
+    
     for item in returned_videos:
-        full_vid_list.append(item)
+        items_list.append(item)
+    
+    return items_list
 
 
 def date_format_to_google_dates(target_date, sample_date):
@@ -249,15 +252,18 @@ def date_format_to_google_dates(target_date, sample_date):
     return target_date_tz
 
 
-def grab_ids_in_date(target_date):
-    """strips the ids from the playlist items in full_vid_list
+def grab_ids_in_date(target_date, items_list):
+    """strips the ids from the playlist items in full_playlist_items_list
     only grabs the ones in target_date range
     adds them to the vid_id_list for a 'video list query'
     to get significantly more details on each"""
-    for item in full_vid_list:
+    out_list = []
+    for item in items_list:
         item_datetime = parser.parse(item["snippet"]["publishedAt"])
         if item_datetime > target_date:
-            vid_id_list.append(item['contentDetails']['videoId'])
+            out_list.append(item['contentDetails']['videoId'])
+    
+    return out_list
 
 
 # Utility Function Section --------------------------------------------------
@@ -306,34 +312,58 @@ def main_search():
     vids_in_target_time"""
     resp = None
     while resp is None:
+
         channel_playlist_id = None
         while channel_playlist_id is None:
             channel_playlist_id = channel_prompt()
+
         saved_playlist_id = channel_playlist_id
+
         target_date = None
         while target_date is None:
             target_date = timeframe_prompt()
+
+        SAMPLE_RETURN_DATE = parser.parse("2022-09-19T18:08:46Z")
+        # used to get correct timezone for comparison
+        # (Taken from test qurey result)
+
         target_date = date_format_to_google_dates(
             target_date,
             SAMPLE_RETURN_DATE)
+
         resp = query_playlistitems_api(channel_playlist_id)
-    original_response = resp  # Save for general channel/playlist metadata
+
+    original_resp = resp  # Save for general channel/playlist metadata
+
     oldest_response_datetime = get_oldest_date_in_response(resp)
-    add_response_vids_to_list(resp)
+
+    full_playlist_items_list = []
+    
+    full_playlist_items_list = add_playlist_items_to_list(
+        resp)
     while oldest_response_datetime > target_date:
         if resp["nextPageToken"]:
             token = resp["nextPageToken"]
             resp = query_playlistitems_api(saved_playlist_id, token)
             oldest_response_datetime = get_oldest_date_in_response(resp)
-            add_response_vids_to_list(resp)
+            full_playlist_items_list = add_playlist_items_to_list(
+                resp)
+
         else:
             break
-    grab_ids_in_date(target_date)
-    query_vids(vid_id_list)
-    last_video_date_in_timeframe = get_oldest_date_in_response(
-        vids_in_target_time
+
+    timeframe_vid_ids = grab_ids_in_date(
+        target_date,
+        full_playlist_items_list)
+
+    viditems_in_target_time = []
+    query_vids(timeframe_vid_ids, viditems_in_target_time)
+
+    lastvideo_date_in_timeframe = get_oldest_date_in_response(
+        viditems_in_target_time
         )
-    return original_response, last_video_date_in_timeframe
+
+    return viditems_in_target_time, original_resp, lastvideo_date_in_timeframe
 
 
 def main():
@@ -344,9 +374,12 @@ def main():
     try:
         while True:
             print_initial_screen()
-            org_resp, last_video_date = main_search()
+            org_resp = None
+            last_video_date = None
+            vids_in_target_time, org_resp, last_video_date = main_search()
             out.output_loop(vids_in_target_time, org_resp, last_video_date)
             ask_restart()
+
     except KeyboardInterrupt:
         print("Unfortuneatly Ctrl-C is the shortcut to exit this template.")
         print("Please run again.")
