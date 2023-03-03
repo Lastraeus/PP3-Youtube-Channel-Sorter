@@ -6,7 +6,7 @@ import datetime
 
 import pyinputplus as pyip
 
-import saveresults as save
+import save_results as save
 
 live_now = datetime.datetime.now  # run as live_now()
 LINE_STRING = "-" * 80  # Max width of template terminal is 80 chars
