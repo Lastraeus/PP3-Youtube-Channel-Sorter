@@ -10,7 +10,7 @@ from dateutil.relativedelta import relativedelta
 from dateutil import parser
 
 import saveresults
-from ascii import logo1
+from ascii import LOGO
 
 # YouTube API query componenet variables--------------------------------------
 API_SERVICE_NAME = "youtube"
@@ -56,13 +56,13 @@ sort_settings = [
 
 def print_initial_screen():
     """Prints The Logo and Initial details of app"""
-    print(logo1)
+    print(LOGO)
     print("Welcome to the YouTube Channel Sorter")
     print("Created by Cian Lane\n")
     print("See https://github.com/Lastraeus/PP3-Youtube-Channel-Sorter")
     print("for README and full credits\n")
     print("The Default search sort will be:\n")
-    print(default_string)
+    print(DEFAULT_STRING)
     print('There will be a option to resort, reprint')
     print('and save the full results at the end\n')
     print("Hint: Right-Click and copy/paste the link from youtube itself\n")
