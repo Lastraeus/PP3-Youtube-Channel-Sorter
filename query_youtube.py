@@ -8,7 +8,7 @@ import googleapiclient.discovery
 from googleapiclient.errors import HttpError
 from dateutil import parser
 
-import chanidgetter
+import channel_id_getter
 
 # YouTube API query componenet variables--------------------------------------
 
@@ -36,8 +36,8 @@ def main_search():
     vids_in_target_time"""
     resp = None
     while resp is None:
-        playlist_id = chanidgetter.get_valid_channel_id()
-        target_date = chanidgetter.get_target_date()
+        playlist_id = channel_id_getter.get_valid_channel_id()
+        target_date = channel_id_getter.get_target_date()
 
         resp = query_playlistitems_api(playlist_id)
 
