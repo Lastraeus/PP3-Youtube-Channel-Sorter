@@ -1,9 +1,13 @@
+"""Module that handles saving a given document in the desired format.
+Can be extened later to add more save options"""
+
 from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
 from oauth2client.service_account import ServiceAccountCredentials
 
+
 # https://docs.iterative.ai/PyDrive2/ for code snippets
-def upload_file_to_gdrive(content, filename):
+def upload_txt_file_to_gdrive(content, filename):
     """Creates a instance pydrive2 file, with the inputted details
     then uploads it to drive. Sets permissions for the file to
     sharable and provides the link"""
