@@ -4,8 +4,6 @@ Handles welcome screen, initial user prompts,
 Passes the results to output_system.py for
 final outputting."""
 
-import pyinputplus as pyip
-
 from ascii import LOGO
 import query_youtube as yt
 import output_system as out
@@ -13,14 +11,13 @@ import output_system as out
 # Begin and End Functions Section --------------------------------------------
 
 
-def ask_restart():
-    """asks the user if they would like to search again, if not
-    it then ends the program"""
-    print('Would you like to run another search? y/n?\n')
-    yes_no = pyip.inputYesNo(default="no")
-    if yes_no == "no":
-        print("Goodbye!")
-        exit()
+def restart_instructions():
+    """tells the user if they would like to search again,
+    to hit the run button again."""
+    print('If you want o run another search,')
+    print("just hit the run button up top!\n")
+    print("Goodbye!")
+    exit()
 
 
 def print_initial_screen():
@@ -42,8 +39,8 @@ def print_initial_screen():
 def main():
     """Holds main program loop. Runs welcome screen,
     then calls yt.main_search then moves to output,
-    then moves to asking the user for another search from
-    the start, exits if they are done.
+    then instructs the user how to run another search then
+    exits.
     Also includes a CTRL C handle message,
     since people really really want to use that for copy pasting"""
     try:
@@ -66,7 +63,7 @@ def main():
                 original_response,
                 last_video_date_in_timeframe)
 
-            ask_restart()
+            restart_instructions()
 
     except KeyboardInterrupt:
         print("Unfortuneatly Ctrl-C is the shortcut to exit this template.")

@@ -28,6 +28,20 @@ The purpose of this project is to be able to query this application and have it 
   As a full list of found videos in the timeframe,
   as a text file for the user to peruse or save.
 
+## __Instructions__
+Upon opening the web page you are faced with the terminal which upon automatically loading will land in the welcome screen.
+
+![Welcome Screen](/docs/readme-images/welcome-screen.png)
+
+The first step to using it is to follow the prompt after the informational text.
+"Enter a valid channel URL"
+
+Once the user has done that (preferably by using their right click menu to paste it in rather than typing, as per the hint)
+
+![Welcome Screen](/docs/readme-images/paste-link.png)
+
+This link to a channel will then be validated and it will ask for another submission if that channel cannot be found by the system.
+After a correct channel has been found
 ## __Research__
 __Understanding the Target Problem__
 
@@ -61,21 +75,14 @@ __Audience Needs/Stories__
 
 'When a channel has been running for years, I wish I could sort by the best of their more "modern" videos.'
 
-'You can sometimes do it by searching the channel name in youtubes own search and using their filters, but often times it gets contaminated with other channels results and playlists instead of videos, or often the search is just plain missing lots of the videos' see https://www.youtube.com/results?search_query=%40bbcnews&sp=CAMSAggF compared to looking at https://www.youtube.com/@BBC/videos
+'You can sometimes do it by searching the channel name in youtubes own search and using their filters, but often times it gets contaminated with other channels results and playlists instead of videos, or often the search is just plain missing lots of the videos' see https://www.youtube.com/results?search_query=%40bbcnews&sp=CAMSAggF compared to looking at https://www.youtube.com/@RTE/videos
 
 __Search For Similar Apps__
 see above for now - TBD
 ## __Planning__
 I  planned a version of the app hosted on heroku using the Code Institute template for the terminal.
 
-The terminal app when run would offer a help page, that could be accessed with "h" and then prompt the user.
-
 This would wait for the user to enter a channel name, and optionally, a timeframe in weeks, months or years. and then return the top 5 or so results sorting by most popular(views) in that timeframe
-
-### __Color Scheme__
-Color Scheme tbd after initial testing.
-
-
 
 
 

@@ -10,6 +10,8 @@ from dateutil import parser
 
 import channel_id_getter
 
+vid_items_in_target_time = []
+
 # YouTube API query componenet variables--------------------------------------
 
 # https://medium.com/mcd-unison
@@ -48,25 +50,21 @@ def main_search():
     full_playlist_items_list = []
 
     full_playlist_items_list = add_playlist_items_to_list(
-        resp)
-    while oldest_response_datetime > target_date:
-        if resp["nextPageToken"]:
-            token = resp["nextPageToken"]
-            resp = query_playlistitems_api(playlist_id, token)
-            oldest_response_datetime = get_oldest_date_in_response(resp)
-            full_playlist_items_list = add_playlist_items_to_list(
-                resp)
+        resp, full_playlist_items_list)
 
-        else:
-            break
+    full_playlist_items_list, oldest_response_datetime = add_more_list_items(
+        full_playlist_items_list,
+        oldest_response_datetime,
+        target_date,
+        playlist_id,
+        resp)
 
     timeframe_vid_ids = grab_ids_in_date(
         target_date,
         full_playlist_items_list)
 
-    vid_items_in_target_time = []
-    query_vids(timeframe_vid_ids, vid_items_in_target_time)
-
+    global vid_items_in_target_time
+    query_vids(timeframe_vid_ids)
     last_video_date_in_timeframe = get_oldest_date_in_response(
         vid_items_in_target_time
         )
@@ -94,7 +92,6 @@ def query_playlistitems_api(playlist_id, token=None):
     # 23945784/how-to-manage-google-api-errors-in-python
     try:
         resp = play_list_request.execute()
-        print("API call was a sucess")
         return resp
     except HttpError as err:
         if err.resp.get('content-type', '').startswith('application/json'):
@@ -105,9 +102,11 @@ def query_playlistitems_api(playlist_id, token=None):
             return None
 
 
-def query_vids(id_list, target_list):
+def query_vids(id_list):
     """takes a list of video ids and then returns details about them.
-    All items are appended to vids_in_target_time dict"""
+    All items are appended to the global vid_items_in_target_time
+    list of dicts"""
+    global vid_items_in_target_time
     next_page_token = None
     if len(id_list) <= 50:
         while True:
@@ -135,7 +134,7 @@ def query_vids(id_list, target_list):
                 title = item["snippet"]["title"]
                 yt_link = f'https://youtu.be/{vid_id}'
 
-                target_list.append(
+                vid_items_in_target_time.append(
                     {
                         'title': title,
                         'likes': vid_likes,
@@ -154,18 +153,40 @@ def query_vids(id_list, target_list):
 
     else:
         list_of_vid_id_lists = list(divide_chunks(id_list, 50))
-        split_vid_list_query(list_of_vid_id_lists, target_list)
+        split_vid_list_query(list_of_vid_id_lists)
 
 
-def split_vid_list_query(list_of_vid_id_lists, target_list):
+def split_vid_list_query(list_of_vid_id_lists):
     """Feeds a block of 50 video ids to api to query,
     due to max of 50 ids submitted per query
     all of which end up appended to vids_in_target_time dictionary"""
     for id_list in list_of_vid_id_lists:
-        query_vids(id_list, target_list)
+        query_vids(id_list)
 
 
 # Response Parsing Section ---------------------------------------------------
+
+
+def add_more_list_items(
+        full_playlist_items_list,
+        oldest_response_datetime,
+        target_date,
+        playlist_id,
+        resp):
+    """deals with more items to add to the playlist items list by
+    running until the dates found are older than the target date"""
+    while oldest_response_datetime > target_date:
+        if resp["nextPageToken"]:
+            token = resp["nextPageToken"]
+            resp = query_playlistitems_api(playlist_id, token)
+            oldest_response_datetime = get_oldest_date_in_response(resp)
+            full_playlist_items_list = add_playlist_items_to_list(
+                resp,
+                full_playlist_items_list)
+        else:
+            break
+
+    return full_playlist_items_list, oldest_response_datetime
 
 
 def get_oldest_date_in_response(response):
@@ -187,11 +208,10 @@ def get_oldest_date_in_response(response):
         return oldest_datetime
 
 
-def add_playlist_items_to_list(response):
+def add_playlist_items_to_list(response, items_list):
     """After a playlist query is searched, add the found video json items
     to the full_playlist_items_list"""
     returned_videos = response["items"]
-    items_list = []
 
     for item in returned_videos:
         items_list.append(item)
@@ -205,6 +225,7 @@ def grab_ids_in_date(target_date, items_list):
     adds them to the vid_id_list for a 'video list query'
     to get significantly more details on each"""
     out_list = []
+
     for item in items_list:
         item_datetime = parser.parse(item["snippet"]["publishedAt"])
         if item_datetime > target_date:
