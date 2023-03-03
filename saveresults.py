@@ -2,7 +2,7 @@ from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
 from oauth2client.service_account import ServiceAccountCredentials
 
-
+# https://docs.iterative.ai/PyDrive2/ for code snippets
 def upload_file_to_gdrive(content, filename):
     """Creates a instance pydrive2 file, with the inputted details
     then uploads it to drive. Sets permissions for the file to
@@ -11,6 +11,7 @@ def upload_file_to_gdrive(content, filename):
     print("UPLOADING NOW - PLEASE WAIT \n")
     scope = ["https://www.googleapis.com/auth/drive"]
     gauth = GoogleAuth()
+    # https://github.com/iterative/PyDrive2/issues/21
     gauth.auth_method = 'service'
     gauth.credentials = ServiceAccountCredentials.from_json_keyfile_name(
         'drive_creds.json',

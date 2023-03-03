@@ -3,20 +3,30 @@
 ## [Link to live website](https://youtube-channel-sorter.herokuapp.com/)
 
 ## __Purpose of the Project__
-To create a terminal based app using Python that prompts the user to input a YouTube channel url and then receive back an output of the videos on that channel, sorted by most popular on a certain timeframe, such as a year.
+To create a terminal based app using Python that prompts the user to input a YouTube channel url and then receive back an output of the videos on that channel, sorted (By: Views, Titles, Likes, etc) on a certain timeframe(Last Year, Last Six Months, Last Month, Last Week)
 
 Youtube does not by default allow you to see a channel's top videos within a certain timeframe. You can only sort by;
 
     "Most recent" 
     
-  which requires you to comb through the list yourself for videos with views more than average for that period
+  which requires you to comb through the list yourself for videos with views more than average for the desired period
 
 and
 
     "Most Popular" 
-  which will sort every video on their channel back to it's inception, by views. The problem being that videos from way back often by default have many more views than more recent ones.
 
-The purpose of this project, is to be able to query this application and have it (however slowly) automate this process of searching for you.
+which will sort every video on their channel back to it's inception, by views. The problem being that videos from way back often by default have many more views than more recent ones, biasing results extremely heavily to their older material. 
+
+This has always bugged me when often I want to see a highlight of a channel's more modern videos to see the best of their modern work.
+
+The purpose of this project is to be able to query this application and have it automate this process of searching for you, then output results both;
+
+  In the terminal
+
+  and
+
+  As a full list of found videos in the timeframe,
+  as a text file for the user to peruse or save.
 
 ## __Research__
 __Understanding the Target Problem__

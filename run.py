@@ -13,6 +13,8 @@ import saveresults
 from ascii import LOGO
 
 # YouTube API query componenet variables--------------------------------------
+# https://medium.com/mcd-unison/youtube-data-api-v3-in-python-tutorial-with-examples-e829a25d2ebd#5999
+# for initial query template
 API_SERVICE_NAME = "youtube"
 API_VERSION = "v3"
 f = open("yt_creds.json", encoding="utf-8")
@@ -46,6 +48,10 @@ DEFAULT_SORT = "views"
 DEFAULT_NUM_TO_OUTPUT = 3
 DEFAULT_ORDER = "desc"
 
+DEFAULT_SETTINGS = [
+    DEFAULT_SORT,
+    DEFAULT_NUM_TO_OUTPUT,
+    DEFAULT_ORDER]
 
 # Welcome and Prompt Fucntion Section ----------------------------------------
 
@@ -108,6 +114,9 @@ def calculate_past_timeframes(input_letter):
     """Accepts the selected timeframe letter and converts that to a
     datetime unit"""
     if input_letter == "y":
+        # https://stackoverflow.com/questions/546321
+        # /how-do-i-calculate-the-date-six
+        # -months-from-the-current-date-using-the-datetime
         one_year_ago = live_now() - relativedelta(years=+1)
         print('You selected: "Last Year"')
         return one_year_ago
@@ -132,6 +141,9 @@ def calculate_past_timeframes(input_letter):
 
 
 # YouTube Query API Functions Section ----------------------------------------
+# https://github.com/CoreyMSchafer/code_snippets
+# /blob/master/Python/YouTube-API/03-Most-Popular-Video-Playlist/start.py
+# was heavily refferenced here for my api query functions needs
 def query_playlistitems_api(playlist_id, token=None):
     """takes a playlist ID from prompt and returns the json response 'r'"""
     play_list_request = youtube.playlistItems().list(
@@ -140,7 +152,8 @@ def query_playlistitems_api(playlist_id, token=None):
         playlistId=playlist_id,
         pageToken=token
     )
-
+    # https://stackoverflow.com/questions/
+    # 23945784/how-to-manage-google-api-errors-in-python
     try:
         resp = play_list_request.execute()
         return resp
@@ -207,7 +220,7 @@ def query_vids(id_list):
 def split_vid_list_query(list_of_vid_id_lists):
     """Feeds a block of 50 video ids to api to query,
     due to max of 50 ids submitted per query
-    all of which end up appended to the one result dictionary"""
+    all of which end up appended to vids_in_target_time dictionary"""
     for id_list in list_of_vid_id_lists:
         query_vids(id_list)
 
@@ -220,7 +233,7 @@ def get_oldest_date_in_response(response):
     published date in the list of items.
     can check the last item in any batch response list,
     as well as the last video in the trimmed results within timeframe"""
-
+    # https://www.geeksforgeeks.org/type-isinstance-python/
     if isinstance(response, list):
         last_video_on_page = response[-1]
         oldest_datetime = parser.parse(last_video_on_page["date"])
@@ -238,13 +251,15 @@ def add_response_vids_to_list(response):
     """After a playlist query is searched, add the found video json items
     to the full_vid_list"""
     returned_videos = response["items"]
-    for i in returned_videos:
-        full_vid_list.append(i)
+    for item in returned_videos:
+        full_vid_list.append(item)
 
 
 def date_format_to_google_dates(target_date, sample_date):
     """converts a standard datetime object to the timezone format
     that google api results return in"""
+    # https://appdividend.com/2023/01/
+    # 07/typeerror-cant-compare-offset-naive-and-offset-aware-datetimes/
     target_date_tz = target_date.astimezone(sample_date.tzinfo)
     return target_date_tz
 
@@ -262,14 +277,17 @@ def grab_ids_in_date(target_date):
 
 def get_credits_used(total_videos):
     """takes a int of total videos returned from query
-    returns the amount of api quota credits it took to get"""
+    returns the amount of api quota credits it took to get.
+    Current implementation is for every query that results in
+    up to 50 videos (max batch size), two quota points are used."""
+
     quota_credits_used = math.ceil((total_videos / 50)) * 2
     return quota_credits_used
 
 
 # Utility Function Section --------------------------------------------------
 
-
+# https://www.geeksforgeeks.org/break-list-chunks-size-n-python/
 def divide_chunks(list_to_divide, max_chunk_size):
     """Divides a list of items into a list of smaller lists of size max
     used to divide id_lists that are too long for googles multi_video list
@@ -306,6 +324,32 @@ def ask_restart():
 # Output Results After Searching/Parsing Section -----------------------------
 
 
+def output_loop(org_resp, last_video_date):
+    settings = DEFAULT_SETTINGS
+    keep_sorting = True
+    while keep_sorting:
+        output_results(
+            org_resp,
+            last_video_date,
+            settings
+            )
+        settings, keep_sorting = new_settings_prompt()
+
+
+def new_settings_prompt():
+    print('Would you like to sort these results differently?')
+    print('Enter y/n')
+    yesno = pyip.inputYesNo(default="no")
+    if yesno == "yes":
+        settings = select_new_sort_settings()
+        keep_sorting = True
+        return settings, keep_sorting
+    else:
+        settings = DEFAULT_SETTINGS
+        keep_sorting = False
+        return settings, keep_sorting
+
+
 def select_new_sort_settings():
     """Querys the user on what sort of sorting they want to do
     validation with pyinputplus
@@ -333,10 +377,8 @@ def select_new_sort_settings():
         numbered=True)
     print(f'You chose: {order}\n')
 
-    sort_settings.clear()
-    sort_settings.append(sort)
-    sort_settings.append(num)
-    sort_settings.append(order)
+    new_settings = [sort, num, order]
+    return new_settings
 
 
 def output_results(
@@ -518,26 +560,7 @@ def main():
         while True:
             print_initial_screen()
             org_resp, last_video_date = main_search()
-
-            sort_settings = [
-                DEFAULT_SORT,
-                DEFAULT_NUM_TO_OUTPUT,
-                DEFAULT_ORDER]
-
-            while len(sort_settings) > 0:
-                output_results(
-                    org_resp,
-                    last_video_date,
-                    sort_settings
-                    )
-                print('Would you like to sort these results differently?')
-                print('Enter y/n')
-                yesno = pyip.inputYesNo(default="no")
-                if yesno == "yes":
-                    select_new_sort_settings()
-                else:
-                    sort_settings.clear()
-
+            output_loop(org_resp, last_video_date)
             ask_restart()
     except KeyboardInterrupt:
         print("Unfortuneatly Ctrl-C is the shortcut to exit this template.")
