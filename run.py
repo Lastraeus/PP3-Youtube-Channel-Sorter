@@ -14,7 +14,7 @@ import output_system as out
 def restart_instructions():
     """tells the user if they would like to search again,
     to hit the run button again."""
-    print('If you want o run another search,')
+    print('If you want to run another search,')
     print("just hit the run button up top!\n")
     print("Goodbye!")
     exit()
