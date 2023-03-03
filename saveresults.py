@@ -7,6 +7,8 @@ def upload_file_to_gdrive(content, filename):
     """Creates a instance pydrive2 file, with the inputted details
     then uploads it to drive. Sets permissions for the file to
     sharable and provides the link"""
+    print()
+    print("UPLOADING NOW - PLEASE WAIT \n")
     scope = ["https://www.googleapis.com/auth/drive"]
     gauth = GoogleAuth()
     gauth.auth_method = 'service'
@@ -33,6 +35,7 @@ def upload_file_to_gdrive(content, filename):
         'type': 'anyone',
         'value': 'anyone',
         'role': 'reader'})
+    print()
     print('Your result is saved at the link below.')
     print('Select it with mouse and right click --> copy \n')
     print(file1['alternateLink'])
