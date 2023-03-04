@@ -1,3 +1,6 @@
+"""A module to hold the logo string variable, for 
+code tidyness reasons."""
+
 LOGO = """ __ __            _____       _        
 |  |  | ___  _ _ |_   _| _ _ | |_  ___ 
 |_   _|| . || | |  | |  | | || . || -_|

@@ -41,7 +41,7 @@ def main():
     then calls yt.main_search then moves to output,
     then instructs the user how to run another search then
     exits.
-    Also includes a CTRL C handle message,
+    Also includes a CTRL-C handle message,
     since people really really want to use that for copy pasting"""
     try:
         while True:

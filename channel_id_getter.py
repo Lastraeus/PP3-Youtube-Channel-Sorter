@@ -14,7 +14,7 @@ import output_system as out
 
 SAMPLE_RETURN_DATE = parser.parse("2022-09-19T18:08:46Z")
 # used to get correct timezone for comparison
-# (Taken from test qurey result)
+# (Taken from test query result)
 
 
 def get_valid_channel_id():
@@ -56,8 +56,8 @@ def channel_prompt():
         # with the second char changed to "U" instead of "C"
         return channel_all_vid_playlist_id
 
-    # TODO dive into pytube2 code to see if we can deal with all possible
-    # exceptions that their channel.channel_id can throw
+    # TODO dive into pytube library code to see if we can
+    # deal with all possible exceptions that their channel.channel_id can throw
     except Exception:
         print("That is not a valid YouTube Channel URL")
 

@@ -19,7 +19,7 @@ ACCEPTED_ORDERS = ["desc", "asc"]
 
 DEFAULT_STRING = 'Sort by Views and show top 3 results\n'
 DEFAULT_SORT = "views"
-DEFAULT_NUM_TO_OUTPUT = 3
+DEFAULT_NUM_TO_OUTPUT = 3  # optimum for target heroku-based terminal template
 DEFAULT_ORDER = "desc"
 
 DEFAULT_SETTINGS = [
@@ -183,7 +183,7 @@ def make_terminal_results_string(
     total_output_results,
     vids_in_target_time
 ):
-    """Takes the defaults and strings needed to format results
+    """Takes the sort settings and strings needed to format results
     for the terminal and then combines them and returns it"""
 
     terminal_output_part_list = []
@@ -213,7 +213,7 @@ def make_terminal_results_string(
 
 
 def make_full_results_string(vids_in_target_time, output_header_string):
-    """Takes the defaults and strings needed to format results for the full
+    """Takes the results and header strings needed to format results for the full
     list of results and then combines them and returns it"""
     output_results_list = []
 
