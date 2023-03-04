@@ -31,7 +31,7 @@ def print_initial_screen():
     print(out.DEFAULT_STRING)
     print('There will be a option to re-sort, re-print')
     print('and save the full results at the end\n')
-    print("Hint: Right-Click and copy/paste the link from youtube itself\n")
+    print("Hint: Right-Click and copy/paste the link from YouTube itself\n")
 
 # main() func section --------------------------------------------------------
 

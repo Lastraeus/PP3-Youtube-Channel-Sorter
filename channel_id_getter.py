@@ -46,12 +46,13 @@ def channel_prompt():
     to validate any possible valid YouTube URL
     Returns the playlist ID of the channel if found with pytube.
     if the search failed it lets the user know to try again"""
-    inputted_url = input("Please input a valid channel URL:\n")
+    inputted_url = input("Please input a valid YouTube channel URL/Link:\n")
     try:
         channel = pytube.Channel(inputted_url)
         channel_id = channel.channel_id
         print("Channel Found")
         channel_all_vid_playlist_id = channel_id[:1] + "U" + channel_id[1 + 1:]
+        # https://stackoverflow.com/a/41753038
         # channel "all videos" playlist id is same as channel id but
         # with the second char changed to "U" instead of "C"
         return channel_all_vid_playlist_id

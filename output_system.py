@@ -213,8 +213,8 @@ def make_terminal_results_string(
 
 
 def make_full_results_string(vids_in_target_time, output_header_string):
-    """Takes the results and header strings needed to format results for the full
-    list of results and then combines them and returns it"""
+    """Takes the results and header strings needed to format results
+    for the full list of results and then combines them and returns it"""
     output_results_list = []
 
     for video in vids_in_target_time:
